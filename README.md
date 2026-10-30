@@ -25,26 +25,41 @@ The built-in test suites target the public [Practice Software Testing / Toolshop
 | **CI** | Runs offline checks with Python 3.11, 3.12, 3.13, and 3.14 through GitHub Actions. |
 
 ## Quick start and daily workflow
+
 ### First launch on Windows
 
 **Requirements:** Python 3.11 or newer. An internet connection is needed to install dependencies, download Chromium, and run live tests.
 
 1. Clone or download this repository.
-2. From the project folder, run:
+2. Open the project folder in Command Prompt or PowerShell.
+3. Run the setup script:
 
    ```bat
    scripts\setup_windows.bat
    ```
 
-3. Start the dashboard:
+   The script creates the virtual environment, installs the Python dependencies, and installs Chromium for Playwright.
+
+4. Start the local dashboard:
 
    ```bat
    scripts\run_dashboard_windows.bat
    ```
 
-4. Open **http://127.0.0.1:8765** in your browser.
+5. Open **http://127.0.0.1:8765** in your browser.
+6. Start with **Test groups → Local checks**. Then try the built-in API and Browser smoke groups for the demo store.
 
-Start with **Test groups → Local checks**. The built-in API and Browser smoke groups can then be used to check the demo store integration.
+### Typical workflow for another website
+
+Use the dashboard only with public websites that you own or are authorized to test.
+
+1. Add the website as a saved test target in the dashboard.
+2. Configure browser checks for the pages you want to inspect.
+3. Add API checks for available endpoints when the website provides an API.
+4. Run the configured checks.
+5. Review the run history, logs, reports, and evidence.
+
+The configurable website checks are read-only. They do not log in, submit forms, change website data, place orders, or perform payments.
 
 ## Running tests
 
