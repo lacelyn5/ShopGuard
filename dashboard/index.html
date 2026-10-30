@@ -1,0 +1,1394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111b2e">
+  <title>ShopGuard 1.9.4 | QA Automation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17233b;
+      --muted: #69768d;
+      --line: #e4e9f1;
+      --paper: #f5f7fb;
+      --card: #ffffff;
+      --navy: #111b2e;
+      --navy-soft: #1a2942;
+      --teal: #1ba98d;
+      --teal-soft: #e3f7f2;
+      --blue: #4c6fff;
+      --blue-soft: #edf0ff;
+      --amber: #c87b18;
+      --amber-soft: #fff3df;
+      --red: #c84558;
+      --red-soft: #fff0f2;
+      --shadow: 0 14px 35px rgba(28, 43, 73, .06);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    button, a { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
+    .sidebar { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto; overscroll-behavior: contain; background: var(--navy); color: #d9e2f2; padding: 26px 17px 20px; display: flex; flex-direction: column; gap: 30px; }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 10px; }
+    .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(145deg, #4ce0bd, #159a90); box-shadow: 0 8px 22px #0c8e7e40; }
+    .brand-mark svg { width: 24px; height: 24px; }
+    .brand-name { font-size: 18px; line-height: 1.05; font-weight: 800; letter-spacing: -.5px; color: #fff; }
+    .brand-sub { margin-top: 5px; font-size: 10px; text-transform: uppercase; letter-spacing: 1.65px; color: #94a7c2; }
+    .nav-label { padding: 0 12px; color: #7186a6; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 800; margin-bottom: 9px; }
+    .nav { display: grid; gap: 5px; }
+    .nav a { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 10px; color: #9daec6; font-size: 13px; transition: .18s ease; }
+    .nav a:hover, .nav a.active { background: #243650; color: #fff; }
+    .nav a.active { box-shadow: inset 3px 0 #40d6b3; }
+    .nav svg { width: 17px; height: 17px; opacity: .9; }
+    .sidebar-bottom { margin-top: auto; padding: 15px 13px; border: 1px solid #34445d; background: #17253a; border-radius: 14px; }
+    .local-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; color: #91e4ce; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #31d0a9; box-shadow: 0 0 0 4px #31d0a91a; }
+    .sidebar-bottom p { color: #8da0bb; font-size: 11px; line-height: 1.55; margin: 10px 0 0; }
+    main { min-width: 0; padding: 27px clamp(18px, 3vw, 44px) 42px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 25px; }
+    .crumb { font-size: 12px; color: var(--muted); }
+    .crumb strong { color: var(--ink); font-weight: 700; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .status-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: #53617a; font-size: 11px; font-weight: 700; }
+    .status-chip .dot { width: 6px; height: 6px; }
+    .icon-btn { border: 1px solid var(--line); border-radius: 10px; background: #fff; color: #64728a; display: inline-grid; place-items: center; width: 36px; height: 36px; }
+    .icon-btn svg { width: 16px; height: 16px; }
+    .hero { position: relative; overflow: hidden; background: linear-gradient(110deg, #182744 0%, #253d62 64%, #275f69 100%); border-radius: 20px; padding: clamp(24px, 4vw, 39px); color: #fff; box-shadow: 0 18px 38px #18274420; }
+    .hero::after { content: ""; position: absolute; width: 310px; height: 310px; border: 1px solid #ffffff13; border-radius: 50%; right: -45px; top: -165px; box-shadow: 0 0 0 34px #ffffff08, 0 0 0 72px #ffffff05; }
+    .hero-inner { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
+    .eyebrow { display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1.6px; font-size: 10px; color: #87e4d1; font-weight: 800; }
+    .eyebrow span { width: 23px; height: 1px; background: #65d7c1; }
+    h1 { font-size: clamp(28px, 3.4vw, 42px); line-height: 1.1; letter-spacing: -1.5px; margin: 14px 0 12px; }
+    .hero p { max-width: 580px; color: #bdc9dc; font-size: 13px; line-height: 1.75; margin: 0; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 23px; }
+    .btn { display: inline-flex; justify-content: center; align-items: center; gap: 9px; border: 0; border-radius: 10px; padding: 11px 15px; font-size: 12px; font-weight: 800; transition: transform .15s, box-shadow .15s, background .15s; }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn:disabled { opacity: .48; cursor: wait; }
+    .btn-primary { background: #39d0ad; color: #0e2b37; box-shadow: 0 7px 20px #39d0ad28; }
+    .btn-primary:hover:not(:disabled) { background: #5ce0c1; }
+    .btn-ghost { color: #f3f6fc; background: #ffffff12; border: 1px solid #ffffff29; }
+    .btn-light { background: #fff; color: #354461; border: 1px solid var(--line); }
+    .btn svg { width: 15px; height: 15px; }
+    .hero-art { width: 155px; min-width: 125px; height: 155px; display: grid; place-items: center; border: 1px solid #ffffff1e; background: #ffffff09; border-radius: 35px; transform: rotate(4deg); }
+    .hero-art svg { width: 91px; height: 91px; filter: drop-shadow(0 8px 16px #0002); }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin: 30px 0 15px; }
+    .section-head h2 { font-size: 17px; letter-spacing: -.35px; margin: 0; }
+    .section-head p { color: var(--muted); font-size: 11px; margin: 6px 0 0; }
+    .subtle-link { color: #536bdf; font-size: 11px; font-weight: 800; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .metric { padding: 17px 18px; background: var(--card); border: 1px solid var(--line); border-radius: 15px; box-shadow: 0 4px 15px #1c2b4905; min-width: 0; }
+    .metric-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; }
+    .metric-icon { display: grid; place-items: center; width: 31px; height: 31px; border-radius: 10px; background: var(--blue-soft); color: var(--blue); }
+    .metric-icon svg { width: 16px; height: 16px; }
+    .metric:nth-child(2) .metric-icon { background: var(--teal-soft); color: var(--teal); }
+    .metric:nth-child(3) .metric-icon { background: var(--red-soft); color: var(--red); }
+    .metric:nth-child(4) .metric-icon { background: var(--amber-soft); color: var(--amber); }
+    .metric-value { margin-top: 13px; font-size: 26px; font-weight: 800; letter-spacing: -.9px; overflow-wrap: anywhere; }
+    .metric-note { color: #8490a4; font-size: 10px; margin-top: 5px; }
+    .suite-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .suite-card { padding: 19px; background: #fff; border: 1px solid var(--line); border-radius: 15px; box-shadow: 0 4px 15px #1c2b4905; min-width: 0; display: flex; flex-direction: column; }
+    .suite-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .suite-icon { display: grid; place-items: center; width: 41px; height: 41px; border-radius: 13px; background: var(--blue-soft); color: var(--blue); }
+    .suite-icon svg { width: 20px; height: 20px; }
+    .suite-card[data-suite="api_smoke"] .suite-icon { background: var(--teal-soft); color: #128a76; }
+    .suite-card[data-suite="ui_smoke"] .suite-icon { background: #f1eaff; color: #8555d6; }
+    .suite-card[data-suite="regression"] .suite-icon { background: var(--amber-soft); color: #b66c12; }
+    .suite-tag { font-size: 9px; letter-spacing: .65px; font-weight: 800; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; background: var(--teal-soft); color: #12866f; white-space: nowrap; }
+    .suite-tag.live { background: var(--amber-soft); color: #9e6419; }
+    .suite-card h3 { font-size: 15px; margin: 16px 0 7px; letter-spacing: -.25px; }
+    .suite-card p { color: var(--muted); font-size: 11px; line-height: 1.65; margin: 0 0 18px; flex: 1; }
+    .suite-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid #edf0f5; padding-top: 14px; }
+    .suite-foot .btn { padding: 9px 12px; font-size: 11px; }
+    .suite-cmd { color: #8190a6; font-size: 10px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .project-runner { padding: 17px 18px; margin-bottom: 14px; display: grid; gap: 13px; }
+    .project-runner-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .project-runner-head h3 { margin: 0 0 5px; font-size: 13px; }
+    .project-runner-head p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .project-runner-head > span { flex: 0 0 auto; color: #8290a4; font-size: 9px; font-weight: 700; }
+    .project-runner-controls { display: grid; grid-template-columns: minmax(210px, .9fr) minmax(220px, 1.2fr) auto; gap: 12px; align-items: end; }
+    .project-runner .project-field select { width: 100%; min-width: 0; border: 1px solid #dce3ed; border-radius: 9px; padding: 10px 11px; color: var(--ink); background: #fbfcfe; font: inherit; font-size: 11px; outline: none; }
+    .project-runner .project-field select:focus { border-color: #62cbb7; box-shadow: 0 0 0 3px #39d0ad20; }
+    .project-runner-summary { min-height: 36px; display: flex; align-content: center; flex-wrap: wrap; gap: 6px; }
+    .project-runner-summary span { display: inline-flex; align-items: center; padding: 5px 7px; border: 1px solid #e8edf4; border-radius: 7px; background: #f7f9fc; color: #65738a; font-size: 9px; overflow-wrap: anywhere; }
+    .project-runner-actions { display: flex; flex-wrap: wrap; gap: 7px; justify-content: flex-end; }
+    .project-runner-actions .btn { white-space: nowrap; padding: 9px 11px; font-size: 10px; }
+    .project-runner-actions .btn:disabled { cursor: not-allowed; opacity: .42; }
+    .project-runner-note { margin: 0; color: #8290a4; font-size: 9px; line-height: 1.55; }
+
+    .project-layout { display: grid; grid-template-columns: minmax(280px, .85fr) minmax(0, 1.15fr); gap: 14px; align-items: start; }
+    .project-form { padding: 18px; display: grid; gap: 11px; }
+    .project-form h3 { font-size: 13px; margin: 0; }
+    .project-form p { color: var(--muted); font-size: 10px; line-height: 1.55; margin: 4px 0 0; }
+    .project-fields { display: grid; gap: 9px; }
+    .project-field { display: grid; gap: 5px; }
+    .project-field label { color: #354461; font-size: 10px; font-weight: 800; }
+    .project-field input { width: 100%; min-width: 0; border: 1px solid #dce3ed; border-radius: 9px; padding: 10px 11px; color: var(--ink); background: #fbfcfe; font: inherit; font-size: 11px; outline: none; }
+    .project-field input:focus, .project-field textarea:focus { border-color: #62cbb7; box-shadow: 0 0 0 3px #39d0ad20; }
+    .project-field textarea { width: 100%; min-width: 0; min-height: 82px; resize: vertical; border: 1px solid #dce3ed; border-radius: 9px; padding: 10px 11px; color: var(--ink); background: #fbfcfe; font: inherit; font-size: 11px; line-height: 1.5; outline: none; }
+    .project-field small { color: #8290a4; font-size: 9px; line-height: 1.45; }
+    .project-options { border: 1px solid #e5eaf1; border-radius: 10px; padding: 9px 10px; background: #fbfcfe; }
+    .project-options summary { color: #40516c; font-size: 10px; font-weight: 800; cursor: pointer; }
+    .project-options-grid { display: grid; gap: 9px; padding-top: 11px; }
+    .project-api-fields { display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 9px; }
+    .project-form-actions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 3px; }
+    .project-form .btn { font-size: 10px; padding: 9px 12px; }
+    .project-list { display: grid; gap: 10px; min-width: 0; }
+    .project-card { background: #fff; border: 1px solid var(--line); border-radius: 13px; padding: 15px; min-width: 0; box-shadow: 0 4px 15px #1c2b4905; }
+    .project-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .project-card h3 { font-size: 13px; margin: 0; overflow-wrap: anywhere; }
+    .project-card-url { margin-top: 5px; color: #77839a; font-size: 10px; overflow-wrap: anywhere; line-height: 1.5; }
+    .project-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .project-card-meta span { padding: 4px 7px; border-radius: 6px; background: #f2f5f9; color: #65738a; font-size: 9px; }
+    .project-card-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; border-top: 1px solid #edf0f5; margin-top: 12px; padding-top: 11px; }
+    .project-card-actions .btn { padding: 8px 10px; font-size: 10px; }
+    .project-card-actions .btn:disabled { cursor: not-allowed; opacity: .4; }
+    .project-history { border-top: 1px solid #edf0f5; margin-top: 11px; padding-top: 9px; }
+    .project-history-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: #53617a; font-size: 10px; font-weight: 800; cursor: pointer; list-style: none; padding: 3px 0; }
+    .project-history-head::-webkit-details-marker { display: none; }
+    .project-history-head::after { content: 'Show history +'; color: #5368c9; font-size: 9px; white-space: nowrap; }
+    .project-history[open] > .project-history-head::after { content: 'Hide history −'; }
+    .project-history-content { padding-top: 6px; }
+    .project-history-empty { color: #8995a8; font-size: 10px; padding: 5px 0 2px; }
+    .run-history-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 8px; padding: 7px 0; border-top: 1px solid #f0f2f6; align-items: center; }
+    .run-history-main { min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; color: #53617a; font-size: 9px; }
+    .run-history-time { color: #6e7b91; }
+    .run-history-state { padding: 3px 6px; border-radius: 5px; font-size: 8px; font-weight: 900; text-transform: uppercase; background: #edf0f5; color: #637188; }
+    .run-history-state.passed { background: #e3f7f2; color: #12866f; }
+    .run-history-state.failed, .run-history-state.error { background: #fff0f2; color: #bb4053; }
+    .run-history-state.running { background: #edf0ff; color: #4c6fff; }
+    .run-history-summary { grid-column: 1 / -1; color: #8a96a9; font-size: 9px; }
+    .run-history-links { display: flex; gap: 9px; font-size: 9px; font-weight: 800; }
+    .run-history-links a { color: #5268c9; text-decoration: underline; text-underline-offset: 2px; }
+    .run-history-empty { color: #8995a8; font-size: 10px; padding: 5px 0 2px; }
+    .project-empty { padding: 22px; text-align: center; color: var(--muted); background: #fff; border: 1px dashed #d8e0eb; border-radius: 12px; font-size: 11px; line-height: 1.6; }
+    .project-section-note { margin-top: 10px; color: #8190a6; font-size: 10px; line-height: 1.6; }
+    .check-manager-body { display:grid; gap:9px; padding-top:11px; }
+    .check-manager-intro { display:flex; align-items:center; justify-content:space-between; gap:10px; color:#77839a; font-size:9px; line-height:1.5; }
+    .add-check-button { flex:0 0 auto; padding:7px 9px !important; font-size:9px !important; }
+    .check-editor-list { display:grid; gap:8px; }
+    .check-editor-row { border:1px solid #e6ebf2; border-radius:10px; padding:10px; background:#fff; display:grid; gap:8px; }
+    .check-editor-head { display:flex; justify-content:space-between; align-items:center; gap:8px; color:#354461; font-size:10px; font-weight:800; }
+    .check-editor-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .check-editor-row .project-field input,.check-editor-row .project-field textarea { padding:8px 9px; font-size:10px; }
+    .check-remove { border:0; background:#fff0f2; color:#ad4051; border-radius:7px; padding:6px 8px; font-size:9px; font-weight:800; }
+    .check-limit-note { color:#8290a4; font-size:9px; }
+    .analytics-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .analytics-card { min-width:0; background:#fff; border:1px solid var(--line); border-radius:13px; padding:15px; }
+    .analytics-card h3 { margin:0; font-size:12px; }
+    .analytics-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .analytics-host { color:#8793a6; font-size:9px; margin-top:4px; overflow-wrap:anywhere; }
+    .analytics-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-top:12px; }
+    .analytics-metric { background:#f7f9fc; border:1px solid #edf0f5; border-radius:8px; padding:8px; min-width:0; }
+    .analytics-metric strong { display:block; font-size:16px; overflow-wrap:anywhere; }
+    .analytics-metric span { display:block; margin-top:3px; color:#8290a4; font-size:8px; }
+    .analytics-trend { display:flex; align-items:end; gap:5px; height:56px; padding:8px 2px 0; margin-top:7px; border-bottom:1px solid #e8edf4; }
+    .analytics-bar { flex:1; min-width:5px; border-radius:4px 4px 0 0; background:#a9b8ce; position:relative; }
+    .analytics-bar.passed { background:#36b99a; } .analytics-bar.failed,.analytics-bar.error { background:#d76b7a; }
+    .analytics-caption { color:#8995a8; font-size:8px; margin-top:6px; }
+    .analytics-compare { margin-top:9px; color:#68768d; font-size:9px; line-height:1.5; }
+    .backup-panel { padding:17px; display:grid; gap:12px; }
+    .backup-actions { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+    .backup-actions h3 { margin:0 0 5px; font-size:13px; } .backup-actions p { margin:0; max-width:620px; color:#7b879b; font-size:10px; line-height:1.6; }
+    .backup-buttons { display:flex; flex-wrap:wrap; gap:7px; flex:0 0 auto; }
+    .backup-buttons .btn { font-size:10px; padding:9px 11px; }
+    .backup-status { color:#738198; font-size:9px; padding:9px 11px; border-radius:8px; background:#f5f7fb; }
+    .backup-list { display:grid; gap:6px; }
+    .backup-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; border:1px solid #edf0f5; border-radius:8px; font-size:9px; }
+    .backup-row span { color:#718097; } .backup-row a { color:#5268c9; font-weight:800; text-decoration:underline; text-underline-offset:2px; }
+    .failure-details { margin-top:5px; padding:8px; border-radius:7px; background:#fff7f8; color:#6d5860; font-size:9px; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .scan-panel { padding: 19px; }
+    .scan-form { display: grid; gap: 9px; }
+    .scan-form > label:first-child { font-size: 11px; font-weight: 800; color: #354461; }
+    .scan-form-row { display: flex; gap: 10px; }
+    .scan-form input[type="url"] { min-width: 0; flex: 1; border: 1px solid #dce3ed; border-radius: 10px; padding: 12px 13px; color: var(--ink); background: #fbfcfe; font: inherit; font-size: 12px; outline: none; }
+    .scan-form input[type="url"]:focus { border-color: #62cbb7; box-shadow: 0 0 0 3px #39d0ad20; }
+    .scan-consent { display: flex; align-items: center; gap: 8px; color: #596780; font-size: 11px; margin-top: 2px; }
+    .scan-consent input { accent-color: var(--teal); }
+    .scan-note { color: #8490a4; font-size: 10px; line-height: 1.65; margin: 0; }
+    .scan-status { margin-top: 16px; border-radius: 10px; padding: 11px 13px; background: #f5f7fb; color: #69768d; font-size: 11px; line-height: 1.6; }
+    .scan-status[data-state="running"] { background: #eef5ff; color: #405b9a; }
+    .scan-status[data-state="error"] { background: var(--red-soft); color: #a63245; }
+    .scan-status[data-state="warning"] { background: var(--amber-soft); color: #9e6419; }
+    .scan-results { margin-top: 15px; border-top: 1px solid var(--line); padding-top: 16px; }
+    .scan-result-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+    .scan-result-head h3 { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+    .scan-result-url { margin-top: 5px; color: #77839a; font-size: 10px; overflow-wrap: anywhere; }
+    .scan-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 13px; }
+    .scan-summary-item { padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px; background: #fbfcfe; }
+    .scan-summary-item strong { display: block; font-size: 20px; letter-spacing: -.5px; }
+    .scan-summary-item span { display: block; color: #7a879c; font-size: 9px; margin-top: 3px; }
+    .scan-checks { display: grid; gap: 7px; }
+    .scan-check { display: grid; grid-template-columns: 66px minmax(0, 1fr); gap: 10px; align-items: start; border: 1px solid #edf0f5; border-radius: 10px; padding: 11px 12px; }
+    .scan-check strong { display: block; font-size: 11px; margin-bottom: 3px; }
+    .scan-check p { margin: 0; color: #748097; font-size: 10px; line-height: 1.6; overflow-wrap: anywhere; }
+    .scan-groups { display: grid; gap: 9px; }
+    .scan-group { border: 1px solid var(--line); border-radius: 11px; background: #fff; overflow: hidden; }
+    .scan-group > summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 13px; cursor: pointer; color: #354461; font-size: 10px; font-weight: 800; list-style: none; }
+    .scan-group > summary::-webkit-details-marker { display: none; }
+    .scan-group > summary::after { content: '+'; color: #65738a; font-size: 15px; line-height: 1; }
+    .scan-group[open] > summary::after { content: '−'; }
+    .scan-group > summary span { margin-left: auto; color: #7c899d; font-size: 9px; font-weight: 600; }
+    .scan-group[data-status="fail"] > summary { background: #fff5f6; }
+    .scan-group[data-status="warning"] > summary { background: #fff9ef; }
+    .scan-group[data-status="pass"] > summary { background: #f5fbf9; }
+    .scan-group .scan-checks { padding: 0 9px 9px; }
+    .scan-badge { display: inline-flex; justify-content: center; min-width: 43px; padding: 4px 6px; border-radius: 6px; text-transform: uppercase; letter-spacing: .35px; font-size: 8px; font-weight: 900; }
+    .scan-meta { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 6px; }
+    .scan-meta span { display: inline-flex; align-items: center; padding: 3px 5px; border-radius: 5px; background: #f2f5f9; color: #69768d; font-size: 8px; line-height: 1.35; }
+    .scan-meta .severity-high { background: #ffeaed; color: #a63245; }
+    .scan-meta .severity-medium { background: #fff3dc; color: #9e6419; }
+    .scan-meta .severity-low { background: #eef2ff; color: #5364c5; }
+    .scan-insight { display: grid; gap: 4px; margin-top: 7px; padding: 8px 9px; border-left: 2px solid #d7deea; border-radius: 0 6px 6px 0; background: #f8fafd; color: #596780; font-size: 9px; line-height: 1.5; }
+    .scan-insight strong { display: inline; margin: 0; font-size: inherit; color: #354461; }
+    .scan-coverage { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+    .scan-coverage span { padding: 5px 7px; background: #f4f7fb; border: 1px solid #e8edf4; border-radius: 6px; color: #69768d; font-size: 9px; }
+    .scan-badge.pass { background: var(--teal-soft); color: #147a68; }
+    .scan-badge.warning { background: var(--amber-soft); color: #9e6419; }
+    .scan-badge.fail { background: var(--red-soft); color: #a63245; }
+    .scan-badge.info { background: var(--blue-soft); color: #5364c5; }
+    .scan-footnote { color: #8a95a8; font-size: 10px; line-height: 1.6; margin: 12px 0 0; }
+    .bottom-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 25px; }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: 15px; overflow: hidden; min-width: 0; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 19px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { font-size: 13px; margin: 0; }
+    .panel-head span { font-size: 10px; color: var(--muted); }
+    .console-head { background: #f9fafc; }
+    .console-dots { display: flex; gap: 5px; margin-right: 7px; }
+    .console-dots i { width: 7px; height: 7px; border-radius: 50%; background: #cfd5df; }
+    .console-dots i:first-child { background: #f08b8b; }
+    .console-dots i:nth-child(2) { background: #f1c46f; }
+    .console-dots i:nth-child(3) { background: #6bd4a9; }
+    .console-wrap { background: #111b2e; color: #c8d5e8; min-height: 210px; padding: 17px 19px; }
+    .console-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 10px; color: #8297b5; margin-bottom: 12px; }
+    .console-status { color: #58d7b6; display: inline-flex; gap: 7px; align-items: center; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 10px; line-height: 1.8; max-height: 265px; overflow: auto; }
+    .empty-log { color: #7187a7; line-height: 1.9; }
+    .target-bar { margin-top: 15px; display: flex; align-items: center; flex-wrap: wrap; gap: 9px; padding: 12px 15px; border: 1px solid #dcebe7; border-radius: 12px; background: #f1faf7; color: #426a63; font-size: 10px; }
+    .target-bar strong { color: #1c6255; }
+    .target-bar a { text-decoration: underline; text-underline-offset: 2px; }
+    .notice { display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; padding: 13px 15px; border: 1px solid #f1dfbb; border-radius: 12px; background: #fff9ed; color: #805f2b; font-size: 10px; line-height: 1.65; }
+    .notice svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 1px; }
+    .footer { display: flex; justify-content: space-between; gap: 15px; padding: 24px 0 0; color: #98a2b4; font-size: 10px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 10; background: #15253d; color: #fff; border: 1px solid #334966; border-radius: 10px; padding: 12px 16px; font-size: 12px; box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); pointer-events: none; transition: .2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .spinner { display: inline-block; width: 11px; height: 11px; border: 2px solid #bdeee2; border-top-color: #148e78; border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 1050px) { .app { grid-template-columns: 205px minmax(0, 1fr); } .hero-art { width: 120px; height: 120px; } .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 900px) { .project-layout { grid-template-columns: 1fr; } .project-runner-controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .project-runner-actions { grid-column: 1 / -1; justify-content: flex-start; } }
+    section[id], .section-head[id] { scroll-margin-top: 24px; }
+    @media (max-width: 760px) { .app { display: block; } .sidebar { position: sticky; top: 0; z-index: 20; height: auto; max-height: 34vh; overflow: auto; padding: 10px 14px; display: flex; gap: 9px; box-shadow: 0 5px 18px #111b2e18; } .brand { padding: 0 3px; } .brand-mark { width: 34px; height: 34px; border-radius: 11px; } .brand-name { font-size: 16px; } .sidebar .nav-label, .sidebar-bottom { display: none; } .sidebar > div:nth-child(2) { min-width: 0; } .sidebar .nav { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 2px; } .nav a { white-space: nowrap; padding: 8px 10px; font-size: 11px; } main { padding: 20px 15px 30px; } .topbar { margin-bottom: 18px; } .hero-inner { display: block; } .hero-art { display: none; } .hero { padding: 25px 22px; } .suite-grid, .bottom-grid { grid-template-columns: 1fr; } .section-head { margin-top: 24px; } .footer { flex-direction: column; } .scan-form-row { flex-direction: column; } .scan-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .scan-check { grid-template-columns: 70px minmax(0, 1fr); } }
+    @media (max-width: 430px) { .metrics { grid-template-columns: 1fr 1fr; gap: 9px; } .metric { padding: 13px; } .metric-value { font-size: 21px; } .status-chip { font-size: 0; gap: 6px; padding: 9px; } .status-chip .dot { width: 7px; height: 7px; } .suite-cmd { display: none; } .suite-foot { align-items: stretch; } .suite-foot .btn { flex: 0 0 auto; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+
+
+    /* ShopGuard 1.9.1 — readability and interaction refinements */
+    .nav a { font-size: 14px; }
+    .brand-sub, .nav-label { font-size: 11px; }
+    .local-pill { font-size: 12px; }
+    .sidebar-bottom p, .crumb, .status-chip { font-size: 12px; }
+    .eyebrow { font-size: 11px; }
+    .hero p { font-size: 14px; }
+    .section-head p { font-size: 12px; }
+    .subtle-link { font-size: 12px; }
+    .metric-top { font-size: 12px; }
+    .metric-note { font-size: 11px; }
+    .suite-tag { font-size: 10px; }
+    .suite-card p { font-size: 12px; }
+    .suite-foot .btn { font-size: 12px; }
+    .suite-cmd { font-size: 11px; }
+    .project-runner-head h3 { font-size: 14px; }
+    .project-runner-head p, .project-runner-note { font-size: 11px; }
+    .project-runner-head > span { font-size: 10px; }
+    .project-runner .project-field select { font-size: 12px; }
+    .project-runner-summary span, .project-runner-actions .btn { font-size: 11px; }
+    .project-form h3 { font-size: 14px; }
+    .project-form p { font-size: 11px; }
+    .project-field label { font-size: 12px; }
+    .project-field input, .project-field textarea { font-size: 12px; }
+    .project-field small, .check-limit-note { font-size: 10px; }
+    .project-options summary { font-size: 12px; }
+    .project-card h3 { font-size: 14px; }
+    .project-card-url { font-size: 11px; }
+    .project-card-meta span, .project-card-actions .btn { font-size: 10px; }
+    .project-history-head { font-size: 11px; }
+    .project-history-head::after { font-size: 10px; }
+    .project-history-empty, .run-history-empty { font-size: 11px; }
+    .run-history-main, .run-history-links, .run-history-summary { font-size: 10px; }
+    .run-history-state { font-size: 9px; }
+    .project-empty, .project-section-note { font-size: 12px; }
+    .check-manager-intro { font-size: 11px; }
+    .add-check-button, .project-form .btn { font-size: 11px !important; }
+    .check-editor-head { font-size: 11px; }
+    .check-editor-row .project-field input, .check-editor-row .project-field textarea { font-size: 11px; }
+    .check-remove { font-size: 10px; }
+    .analytics-card h3 { font-size: 14px; }
+    .analytics-host { font-size: 10px; }
+    .analytics-metric span, .analytics-caption { font-size: 10px; }
+    .analytics-compare { font-size: 11px; }
+    .backup-actions h3 { font-size: 14px; }
+    .backup-actions p { font-size: 11px; }
+    .backup-buttons .btn, .backup-row { font-size: 11px; }
+    .backup-status { font-size: 11px; }
+    .scan-form > label:first-child { font-size: 12px; }
+    .scan-form input[type="url"] { font-size: 13px; }
+    .scan-consent { font-size: 12px; }
+    .scan-note, .scan-footnote { font-size: 11px; }
+    .scan-status { font-size: 12px; }
+    .scan-result-head h3 { font-size: 14px; }
+    .scan-result-url { font-size: 11px; }
+    .scan-summary-item span { font-size: 10px; }
+    .scan-group > summary { font-size: 12px; }
+    .scan-group > summary span { font-size: 10px; }
+    .scan-check strong { font-size: 12px; }
+    .scan-check p { font-size: 11px; }
+    .scan-meta span, .scan-insight, .scan-coverage span { font-size: 10px; }
+    .panel-head h2 { font-size: 14px; }
+    .panel-head span, .console-meta { font-size: 11px; }
+    pre { font-size: 11px; }
+    .notice, .target-bar, .footer { font-size: 11px; }
+
+    .check-manager { padding: 0; overflow: hidden; }
+    .check-manager > summary { display:flex; align-items:center; justify-content:space-between; gap:12px; list-style:none; padding:12px 13px; }
+    .check-manager > summary::-webkit-details-marker { display:none; }
+    .check-manager > summary::after { content:'+'; color:#69768d; font-size:17px; line-height:1; }
+    .check-manager[open] > summary::after { content:'−'; }
+    .check-manager > summary span:first-child { color:#33445f; }
+    .check-manager-count { margin-left:auto; color:#16846f; background:#e3f7f2; border-radius:999px; padding:4px 8px; font-size:10px; font-weight:800; white-space:nowrap; }
+    .check-manager-body { padding:0 12px 12px; }
+    .check-editor-row { padding:0; display:block; overflow:hidden; }
+    .check-editor-summary { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 12px; list-style:none; cursor:pointer; color:#354461; }
+    .check-editor-summary::-webkit-details-marker { display:none; }
+    .check-editor-summary::after { content:'+'; color:#687790; font-size:16px; margin-left:4px; }
+    .check-editor-row[open] > .check-editor-summary::after { content:'−'; }
+    .check-editor-summary-title { min-width:0; display:flex; align-items:center; flex-wrap:wrap; gap:7px; }
+    .check-editor-summary-title strong { font-size:11px; color:#53617a; }
+    .check-editor-summary-title span { font-size:12px; font-weight:700; overflow-wrap:anywhere; }
+    .check-editor-summary-path { color:#78869b; font-size:10px; margin-left:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:32%; }
+    .check-editor-content { display:grid; gap:9px; padding:0 12px 12px; border-top:1px solid #edf0f5; }
+    .check-editor-content .check-editor-head { padding-top:10px; }
+    .recent-activity-panel { margin-top:16px; padding:16px 18px; background:#fff; border:1px solid var(--line); border-radius:15px; box-shadow:0 4px 15px #1c2b4905; }
+    .recent-activity-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:9px; }
+    .recent-activity-head h2 { margin:0; font-size:15px; }
+    .recent-activity-head p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+    .recent-activity-list { display:grid; }
+    .recent-activity-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid #edf0f5; }
+    .recent-activity-main { min-width:0; display:grid; gap:3px; }
+    .recent-activity-main strong { font-size:12px; overflow-wrap:anywhere; }
+    .recent-activity-main span { color:#6f7c91; font-size:11px; }
+    .recent-activity-main small { color:#8a96a9; font-size:10px; overflow-wrap:anywhere; }
+    .recent-activity-meta { display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; flex:0 0 auto; }
+    .recent-activity-duration { color:#6f7c91; font-size:10px; }
+    .recent-activity-meta a { color:#5268c9; font-size:11px; font-weight:800; text-decoration:underline; text-underline-offset:2px; }
+    .project-card:target { outline:2px solid #4c6fff55; outline-offset:3px; }
+    .nav a:focus-visible, .recent-activity-meta a:focus-visible, summary:focus-visible { outline:2px solid #56cdb5; outline-offset:3px; }
+    @media (max-width:760px) {
+      .nav a { font-size:12px; }
+      .recent-activity-row { align-items:flex-start; flex-direction:column; }
+      .recent-activity-meta { justify-content:flex-start; }
+      .check-editor-summary-path { max-width:28%; }
+      section[id], .section-head[id] { scroll-margin-top:115px; }
+    }
+
+    /* Readable metadata overrides; keep the established palette. */
+    .suite-tag, .project-runner-head > span, .project-field small, .check-limit-note,
+    .project-card-meta span, .project-card-actions .btn, .project-history-head,
+    .project-history-head::after, .project-history-empty, .run-history-empty,
+    .run-history-main, .run-history-links, .run-history-summary,
+    .analytics-host, .analytics-metric span, .analytics-caption,
+    .scan-summary-item span, .scan-group > summary span, .scan-meta span,
+    .scan-insight, .scan-coverage span, .failure-details { font-size:11px; }
+    .run-history-state, .scan-badge, .check-manager-count,
+    .check-editor-summary-title strong, .check-remove { font-size:10px; }
+    .analytics-compare, .backup-status, .backup-row, .project-runner-note,
+    .project-runner-summary span, .project-runner-actions .btn { font-size:12px; }
+    .recent-activity-main small, .recent-activity-duration { font-size:11px; }
+    .check-editor-summary-path { font-size:11px; }
+    .check-editor-content .project-field small { line-height:1.45; }
+
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" aria-label="Main navigation">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5 20 5.5v5.7c0 5.1-3.4 8.6-8 10.3-4.6-1.7-8-5.2-8-10.3V5.5l8-3Z" stroke="#083e3b" stroke-width="1.7"/><path d="m7.7 12.2 2.8 2.7 5.9-6" stroke="#083e3b" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="brand-name">ShopGuard</div><div class="brand-sub">Website testing</div></div>
+    </div>
+    <div>
+      <div class="nav-label">Menu</div>
+      <nav class="nav" aria-label="Dashboard sections">
+        <a class="active" href="#dashboard-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="4" rx="1.5"/><rect x="14" y="10" width="7" height="11" rx="1.5"/><rect x="3" y="13" width="7" height="8" rx="1.5"/></svg>Dashboard</a>
+        <a href="#suites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 4.5h10a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2h2"/><rect x="7" y="2.5" width="8" height="4" rx="1.2"/><path d="m7 12 2 2 4-4M7 17h10"/></svg>Test groups</a>
+        <a href="#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h4l1.7 1.8h7.3A1.5 1.5 0 0 1 20 9.3v9.2a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M8 12h8M8 15.5h5"/></svg>Test projects</a>
+        <a href="#url-scan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5M4.5 10.8h12.6M10.8 4.1c1.8 1.8 2.6 4 2.6 6.7s-.8 4.9-2.6 6.7M10.8 4.1C9 5.9 8.2 8.1 8.2 10.8s.8 4.9 2.6 6.7"/></svg>Website scanner</a>
+        <a href="#analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-5 3 2 5-7"/></svg>Analytics</a>
+        <a href="#data-management"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Data management</a>
+        <a href="#evidence"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>Test log</a>
+      </nav>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="local-pill"><span class="dot"></span> Runs on this PC</div>
+      <p>This program runs on your computer. Tests use the files and Python setup in this folder.</p>
+    </div>
+  </aside>
+
+  <main id="overview">
+    <div class="topbar">
+      <div class="crumb"><strong>Home</strong></div>
+      <div class="top-actions"><div class="status-chip" id="connection-chip"><span class="dot"></span><span id="connection-label">Connecting…</span></div><button class="icon-btn" id="refresh-button" title="Refresh" aria-label="Refresh status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.7-2L20 12M4 12l2.7 6a7 7 0 0 0 11.7-2"/></svg></button></div>
+    </div>
+
+    <section class="hero" id="dashboard-top" aria-labelledby="hero-title">
+      <div class="hero-inner">
+        <div>
+          <div class="eyebrow"><span></span> Website and shop tests</div>
+          <h1 id="hero-title">Check a website<br>before release.</h1>
+          <p>Check the demo shop or enter another public website address. ShopGuard checks the page in a browser, looks for common problems and checks a few links.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#suites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 5 11 7-11 7V5Z"/></svg>Choose test group</a>
+            <a class="btn btn-ghost" href="https://practicesoftwaretesting.com/" target="_blank" rel="noopener noreferrer">Open demo shop <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true"><svg viewBox="0 0 100 100" fill="none"><path d="M50 7 84 20v24c0 22-14.5 37-34 47C30.5 81 16 66 16 44V20L50 7Z" fill="#36d0b0" fill-opacity=".2" stroke="#68e1c7" stroke-width="2.5"/><path d="m32 49 12 12 25-27" stroke="#72ead2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="78" cy="24" r="7" fill="#8deedb"/><circle cx="20" cy="68" r="4" fill="#8deedb"/></svg></div>
+      </div>
+    </section>
+
+    <div class="section-head" id="test-summary">
+      <div><h2>Test summary</h2><p>Results from the last test run</p></div>
+      <a class="subtle-link" href="#evidence">View test log →</a>
+    </div>
+    <section class="metrics" aria-label="Latest test metrics">
+      <article class="metric"><div class="metric-top"><span>Latest run</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><div class="metric-value" id="metric-run">—</div><div class="metric-note" id="metric-run-note">No tests run yet</div></article>
+      <article class="metric"><div class="metric-top"><span>Passed</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 4 4L19 6"/></svg></span></div><div class="metric-value" id="metric-passed">—</div><div class="metric-note">Checks that passed</div></article>
+      <article class="metric"><div class="metric-top"><span>Failures</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m7 7 10 10M17 7 7 17"/></svg></span></div><div class="metric-value" id="metric-failed">—</div><div class="metric-note">Failed checks or run errors</div></article>
+      <article class="metric"><div class="metric-top"><span>Test groups</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg></span></div><div class="metric-value">04</div><div class="metric-note">Local and online tests</div></article>
+    </section>
+
+    <section class="recent-activity-panel" id="recent-activity" aria-labelledby="recent-activity-title">
+      <div class="recent-activity-head"><div><h2 id="recent-activity-title">Recent activity</h2><p>Latest saved-project checks across all websites.</p></div><a href="#projects" class="subtle-link">View projects →</a></div>
+      <div id="recent-activity-list" class="recent-activity-list" aria-live="polite"><div class="project-empty">Recent project runs will appear here after your first Browser or API check.</div></div>
+    </section>
+
+    <div class="section-head" id="suites">
+      <div><h2>Test groups</h2><p>The four built-in groups use the included demo shop. Use the saved-project runner below to check any website you add.</p></div>
+      <span class="subtle-link" id="suite-state">4 built-in groups</span>
+    </div>
+    <section class="panel project-runner" aria-labelledby="project-runner-title">
+      <div class="project-runner-head">
+        <div><h3 id="project-runner-title">Run checks for a saved project</h3><p>Select a website from Test projects. ShopGuard will use that project's saved URL, API endpoint and assertions.</p></div>
+        <span id="project-runner-count">Loading projects…</span>
+      </div>
+      <div class="project-runner-controls">
+        <div class="project-field"><label for="project-runner-select">Saved project</label><select id="project-runner-select" disabled><option value="">Loading saved projects…</option></select></div>
+        <div id="project-runner-summary" class="project-runner-summary" aria-live="polite"><span>Saved project settings will appear here.</span></div>
+        <div class="project-runner-actions"><button class="btn btn-primary target-run-button" id="runner-all-button" data-target-run="all" type="button" disabled>Run all checks</button><button class="btn btn-light target-run-button" id="runner-browser-button" data-target-run="ui" type="button" disabled>Browser</button><button class="btn btn-light target-run-button" id="runner-api-button" data-target-run="api" type="button" disabled>API</button></div>
+      </div>
+      <p class="project-runner-note" id="project-runner-note">These checks use the selected project's configured smoke assertions. They do not reuse the demo shop's product, login or catalog test cases.</p>
+    </section>
+    <section class="suite-grid" aria-label="Built-in demo test groups">
+      <article class="suite-card" data-suite="unit">
+        <div class="suite-top"><div class="suite-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h10l4 4v14H3V3h4Z"/><path d="M14 3v5h5M7 13l2.2 2.2L14 10M7 18h10"/></svg></div><span class="suite-tag">Offline</span></div>
+        <h3>Local checks</h3><p>Check project settings, test rules and Postman files. These tests do not connect to the internet.</p>
+        <div class="suite-foot"><span class="suite-cmd">pytest -m unit</span><button class="btn btn-light run-button" data-run="unit">Run checks <span aria-hidden="true">→</span></button></div>
+      </article>
+      <article class="suite-card" data-suite="api_smoke">
+        <div class="suite-top"><div class="suite-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2" fill="#fff"/><circle cx="15" cy="12" r="2" fill="#fff"/><circle cx="11" cy="18" r="2" fill="#fff"/></svg></div><span class="suite-tag live">Online API</span></div>
+        <h3>API checks</h3><p>Check products, categories, brands and pages that should not be open to visitors without signing in.</p>
+        <div class="suite-foot"><span class="suite-cmd">pytest -m "api and smoke"</span><button class="btn btn-light run-button" data-run="api_smoke">Run checks <span aria-hidden="true">→</span></button></div>
+      </article>
+      <article class="suite-card" data-suite="ui_smoke">
+        <div class="suite-top"><div class="suite-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="15" rx="2"/><path d="M3 8h18M7 6h.01M10 6h.01M9 23h6M12 19v4"/></svg></div><span class="suite-tag live">Online browser</span></div>
+        <h3>Browser checks</h3><p>Open the demo shop in a browser. Check the product list, a product page and the login form.</p>
+        <div class="suite-foot"><span class="suite-cmd">pytest -m "ui and smoke"</span><button class="btn btn-light run-button" data-run="ui_smoke">Run checks <span aria-hidden="true">→</span></button></div>
+      </article>
+      <article class="suite-card" data-suite="regression">
+        <div class="suite-top"><div class="suite-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-5 3 2 5-7"/><circle cx="7" cy="15" r="1"/><circle cx="11" cy="10" r="1"/><circle cx="14" cy="12" r="1"/><circle cx="19" cy="5" r="1"/></svg></div><span class="suite-tag live">Online · full</span></div>
+        <h3>Full check (no changes)</h3><p>Run more API and browser tests. Skip tests that change the cart or use a login.</p>
+        <div class="suite-foot"><span class="suite-cmd">pytest -m "(api or ui) …"</span><button class="btn btn-primary run-button" data-run="regression">Run checks <span aria-hidden="true">→</span></button></div>
+      </article>
+    </section>
+
+    <section id="projects" aria-labelledby="projects-title">
+      <div class="section-head">
+        <div><h2 id="projects-title">Test projects</h2><p>Configure browser expectations and API response checks for each saved website.</p></div>
+        <span class="subtle-link" id="project-count">Loading projects…</span>
+      </div>
+      <div class="project-layout">
+        <form id="project-form" class="panel project-form">
+          <div><h3 id="project-form-title">Add a test project</h3><p>Use <strong>Add project</strong> to create a separate card. Use <strong>Edit</strong> on a saved card only when you want to change that project.</p></div>
+          <input type="hidden" id="project-id" value="">
+          <div class="project-fields">
+            <div class="project-field"><label for="project-name">Project name</label><input id="project-name" maxlength="80" placeholder="My online store" required></div>
+            <div class="project-field"><label for="project-store-url">Storefront URL</label><input id="project-store-url" type="url" maxlength="2048" placeholder="https://store.example.com" required></div>
+            <details class="project-options check-manager" id="browser-checks-manager">
+              <summary><span>Browser checks and assertions</span><span class="check-manager-count" id="browser-check-count">1 configured</span></summary>
+              <div class="check-manager-body">
+                <div class="check-manager-intro"><span>Each check opens one same-host page and validates its configured title, H1 or visible text.</span><button class="btn btn-light add-check-button" id="add-browser-check" type="button">+ Add browser check</button></div>
+                <div id="browser-checks-editor" class="check-editor-list"></div>
+              </div>
+            </details>
+            <div class="project-field"><label for="project-api-url">API base URL <span style="font-weight:400;color:#8994a6">(optional)</span></label><input id="project-api-url" type="url" maxlength="2048" placeholder="https://api.example.com"></div>
+            <details class="project-options check-manager" id="api-checks-manager">
+              <summary><span>API checks · GET-only</span><span class="check-manager-count" id="api-check-count">0 configured</span></summary>
+              <div class="check-manager-body">
+                <div class="check-manager-intro"><span>GET-only requests. Add one row per endpoint; JSON assertions are optional.</span><button class="btn btn-light add-check-button" id="add-api-check" type="button">+ Add API check</button></div>
+                <div id="api-checks-editor" class="check-editor-list"></div>
+                <small class="check-limit-note">Up to 20 Browser checks and 20 API checks per project.</small>
+              </div>
+            </details>
+          </div>
+          <div class="project-form-actions"><button class="btn btn-primary" id="project-save" type="submit">Add project</button><button class="btn btn-light" id="project-reset" type="button">Reset form</button></div>
+          <p>All configured checks are read-only: API uses GET; browser checks only load the selected page and inspect its visible content.</p>
+        </form>
+        <div class="project-list" id="project-list" aria-live="polite"><div class="project-empty">Loading saved test projects…</div></div>
+      </div>
+      <p class="project-section-note">The dashboard keeps up to 1,000 of the newest registered-project runs in total across all projects on this computer. Expand a project’s Run history to see all of its retained runs and open their logs or JUnit reports. These are configurable smoke assertions, not full product, search, checkout or authentication regression tests.</p>
+    </section>
+
+    <section id="url-scan" aria-labelledby="url-scan-title">
+      <div class="section-head">
+        <div><h2 id="url-scan-title">Check a website</h2><p>Enter a public website address. ShopGuard will open it in a browser and check its main parts.</p></div>
+        <span class="subtle-link">Website check</span>
+      </div>
+      <div class="panel scan-panel">
+        <form id="scan-form" class="scan-form">
+          <label for="scan-url">Website URL</label>
+          <div class="scan-form-row">
+            <input id="scan-url" name="url" type="url" maxlength="2048" placeholder="https://your-store.com" autocomplete="url" required>
+            <button class="btn btn-primary" id="scan-button" type="submit">Check website <span aria-hidden="true">→</span></button>
+          </div>
+          <label class="scan-consent" for="scan-authorized"><input id="scan-authorized" type="checkbox" required><span>I own this website or have permission to check it.</span></label>
+          <p class="scan-note">ShopGuard opens the page in a temporary browser and performs a short, read-only check. It does not sign in, click buttons, submit forms, change the cart or place orders. PASS = check observed as OK; WARN = possible issue or environment signal to review; FAIL = a stronger problem signal; INFO = not tested, a recommendation or a scan limitation. A result is not proof that the whole site is defect-free.</p>
+        </form>
+        <div id="scan-status" class="scan-status" role="status" aria-live="polite">Enter a public website address. Local and private addresses are blocked.</div>
+        <div id="scan-results" class="scan-results" hidden></div>
+      </div>
+    </section>
+
+    <div class="section-head" id="analytics">
+      <div><h2>Analytics</h2><p>Recent outcomes and runtime comparisons for each saved project.</p></div>
+      <span class="subtle-link">Last 30 runs per project</span>
+    </div>
+    <section class="analytics-grid" id="analytics-list" aria-live="polite"><div class="project-empty">Analytics will appear after your first saved-project run.</div></section>
+
+    <div class="section-head" id="data-management">
+      <div><h2>Data management</h2><p>Protect your saved projects, run history and local test evidence.</p></div>
+      <span class="subtle-link">Local backups · no cloud</span>
+    </div>
+    <section class="panel backup-panel">
+      <div class="backup-actions">
+        <div><h3>Backup and restore</h3><p>ZIP backups include project profiles, run history and referenced logs, JUnit reports, JSON evidence and screenshots. Referenced evidence is capped at 15 MB per backup; if older/large files exceed that cap, ShopGuard reports how many were omitted. Credentials, .env and the Python environment are never included.</p></div>
+        <div class="backup-buttons"><button class="btn btn-primary" id="backup-create" type="button">Create backup</button><button class="btn btn-light" id="backup-restore-button" type="button">Restore backup</button><input type="file" id="backup-file" accept=".zip,application/zip" hidden></div>
+      </div>
+      <div class="backup-status" id="backup-status" role="status" aria-live="polite">Automatic backup is created before project edits, deletions and restore operations. The five newest automatic backups are retained.</div>
+      <div class="backup-list" id="backup-list"><div class="project-empty">Loading backups…</div></div>
+    </section>
+
+    <div class="bottom-grid">
+      <section class="panel" id="evidence" aria-labelledby="test-log-title">
+        <div class="panel-head console-head"><div style="display:flex;align-items:center;gap:10px"><span class="console-dots"><i></i><i></i><i></i></span><h2 id="test-log-title">Test log</h2></div><span id="log-state">Waiting for tests</span></div>
+        <div class="console-wrap"><div class="console-meta"><span class="console-status" id="console-status"><span class="dot"></span> Ready</span><span id="console-time">—</span></div><pre id="console-output"><span class="empty-log">Test results will appear here. Start with Local checks before running online tests.</span></pre></div>
+      </section>
+    </div>
+
+    <div class="target-bar"><strong>Built-in demo target</strong><span id="shop-target">Storefront: loading…</span><span aria-hidden="true">·</span><span id="api-target">API: loading…</span><span id="target-warning" hidden></span></div>
+    <div class="notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17.5v.01"/></svg><div><strong>Public demo shop.</strong> Online tests use a shared training shop and its API. Results can change if the site is updated or unavailable. The test that changes the cart is disabled by default.</div></div>
+    <footer class="footer"><span>ShopGuard QA Automation · v1.9.4 · Created by Maksim Kernazhytski</span><span>Runs on your computer · No tracking</span></footer>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const toast = $('toast');
+  let toastTimer;
+  let busy = false;
+  let targetRunPending = false;
+  let lastLog = '';
+  let lastRenderedScanId = null;
+  let activeScanId = null;
+  let scanButtonOriginal = null;
+  let lastProjectsSignature = '';
+  let savedProjects = [];
+  let selectedRunnerProjectId = '';
+  let lastRunnerOptionsSignature = '';
+  const escapeText = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+  function formatDate(value) {
+    if (!value) return '—';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+  }
+  function setBusy(value) {
+    busy = value;
+    document.querySelectorAll('.run-button, .target-run-button, .project-edit-button, .project-delete-button, #project-save, #project-reset, #project-runner-select').forEach((button) => {
+      button.disabled = value || button.dataset.permanentlyDisabled === 'true';
+      if (value && !button.dataset.originalText) button.dataset.originalText = button.innerHTML;
+      if (!value && button.dataset.originalText) {
+        button.innerHTML = button.dataset.originalText;
+        delete button.dataset.originalText;
+      }
+    });
+  }
+  function updateRunButtons(current) {
+    document.querySelectorAll('.run-button, .target-run-button').forEach((button) => {
+      const suiteId = button.dataset.run || `target_${button.dataset.targetRun}`;
+      const isCurrent = current && current.suite_id === suiteId
+        && (!button.dataset.targetId || current.target_id === button.dataset.targetId);
+      if (isCurrent && current.status === 'running') {
+        if (!button.dataset.originalText) button.dataset.originalText = button.innerHTML;
+        button.innerHTML = '<span class="spinner" aria-hidden="true"></span> Running…';
+      } else if (button.dataset.originalText && !busy) {
+        button.innerHTML = button.dataset.originalText;
+        delete button.dataset.originalText;
+      }
+    });
+  }
+  function updateMetrics(run, running) {
+    if (running) {
+      $('metric-run').textContent = 'Running';
+      $('metric-passed').textContent = '—';
+      $('metric-failed').textContent = '—';
+      $('metric-run-note').textContent = run ? run.name : 'Tests are running';
+      $('console-status').innerHTML = '<span class="spinner" aria-hidden="true"></span> Running tests';
+      $('log-state').textContent = 'Live output';
+      $('console-time').textContent = formatDate(run?.started_at);
+      return;
+    }
+    if (!run) {
+      $('metric-run').textContent = '—';
+      $('metric-run-note').textContent = 'No tests run yet';
+      $('metric-passed').textContent = '—';
+      $('metric-failed').textContent = '—';
+      $('console-status').innerHTML = '<span class="dot"></span> Ready';
+      $('log-state').textContent = 'Waiting for tests';
+      $('console-time').textContent = '—';
+      return;
+    }
+    const summary = run.summary;
+    $('metric-run').textContent = run.status === 'passed' ? 'Passed' : run.status === 'failed' ? 'Failed' : run.status === 'error' ? 'Error' : 'Stopped';
+    $('metric-run-note').textContent = `${run.name} · ${formatDate(run.ended_at)}`;
+    $('metric-passed').textContent = summary ? String(summary.passed) : '—';
+    $('metric-failed').textContent = summary ? String((summary.failures || 0) + (summary.errors || 0)) : (run.status === 'failed' ? 'Check log' : '—');
+    const color = run.status === 'passed' ? '#58d7b6' : run.status === 'failed' || run.status === 'error' ? '#ff9aa9' : '#f0c979';
+    const label = run.status === 'passed' ? 'Tests finished' : run.status === 'failed' ? 'Some tests failed' : run.status === 'error' ? 'Could not run tests' : 'Run stopped';
+    $('console-status').innerHTML = `<span class="dot" style="background:${color};box-shadow:none"></span> ${escapeText(label)}`;
+    $('log-state').textContent = summary ? `${summary.tests} tests · ${summary.duration}s` : 'View log';
+    $('console-time').textContent = `${formatDate(run.ended_at)} · ${run.duration ?? 0}s`;
+  }
+  function updateTargets(targets) {
+    if (!targets) return;
+    $('shop-target').innerHTML = targets.shop_url ? `Storefront: <a href="${escapeText(targets.shop_url)}" target="_blank" rel="noopener noreferrer">${escapeText(new URL(targets.shop_url).hostname)}</a>` : 'Storefront: not set';
+    $('api-target').innerHTML = targets.api_url ? `API: <a href="${escapeText(targets.api_url)}" target="_blank" rel="noopener noreferrer">${escapeText(new URL(targets.api_url).hostname)}</a>` : 'API: not set';
+    if (targets.warning) {
+      $('target-warning').hidden = false;
+      $('target-warning').textContent = `Setup warning: ${targets.warning}`;
+    }
+  }
+  function projectBrowserChecks(project) {
+    return Array.isArray(project?.browser_checks) && project.browser_checks.length
+      ? project.browser_checks
+      : [{id:'browser-1', name:'Storefront', path:project?.browser_path || '', expected_title:project?.expected_title || '', expected_h1:project?.expected_h1 || '', required_text:project?.required_text || ''}];
+  }
+  function projectApiChecks(project) {
+    return Array.isArray(project?.api_checks) && project.api_checks.length
+      ? project.api_checks
+      : (project?.api_url ? [{id:'api-1', name:'API endpoint', path:project.api_path || '/', expected_status:project.expected_status || 200, expected_content_type:project.api_expected_content_type || '', json_assertions:project.api_json_assertions || []}] : []);
+  }
+  function renderProjectRunner(projects) {
+    savedProjects = Array.isArray(projects) ? projects : [];
+    const select = $('project-runner-select');
+    const wantedId = selectedRunnerProjectId || select.value;
+    const selectedStillExists = savedProjects.some((project) => project.id === wantedId);
+    selectedRunnerProjectId = selectedStillExists ? wantedId : (savedProjects[0]?.id || '');
+    const optionSignature = JSON.stringify(savedProjects.map((project) => [project.id, project.name, project.store_url]));
+    if (optionSignature !== lastRunnerOptionsSignature) {
+      select.innerHTML = savedProjects.length
+        ? savedProjects.map((project) => {
+            let host = project.store_url;
+            try { host = new URL(project.store_url).hostname; } catch {}
+            return `<option value="${escapeText(project.id)}">${escapeText(project.name)} — ${escapeText(host)}</option>`;
+          }).join('')
+        : '<option value="">No saved projects — add one in Test projects</option>';
+      lastRunnerOptionsSignature = optionSignature;
+    }
+    select.value = selectedRunnerProjectId;
+    const project = savedProjects.find((item) => item.id === selectedRunnerProjectId);
+    $('project-runner-count').textContent = `${savedProjects.length} saved project${savedProjects.length === 1 ? '' : 's'}`;
+    const browserChecks = project ? projectBrowserChecks(project) : [];
+    const apiChecks = project ? projectApiChecks(project) : [];
+    if (!project) {
+      $('project-runner-summary').innerHTML = '<span>No saved project selected</span>';
+      $('project-runner-note').textContent = 'Add a website in Test projects. It will appear in this list automatically.';
+    } else {
+      let storeHost = project.store_url;
+      let apiHost = project.api_url;
+      try { storeHost = new URL(project.store_url).hostname; } catch {}
+      try { apiHost = new URL(project.api_url).hostname; } catch {}
+      const browserRules = browserChecks.reduce((total, check) => total + [check.expected_title, check.expected_h1, check.required_text].filter(Boolean).length, 0);
+      const apiRules = apiChecks.reduce((total, check) => total + (check.expected_content_type ? 1 : 0) + (Array.isArray(check.json_assertions) ? check.json_assertions.length : 0), 0);
+      const chips = [
+        `Storefront · ${storeHost}`, `Browser checks · ${browserChecks.length}`, `Browser rules · ${browserRules}`,
+        project.api_url ? `API · ${apiHost}` : 'API · not configured', `API checks · ${apiChecks.length}`, `API rules · ${apiRules}`,
+      ];
+      $('project-runner-summary').innerHTML = chips.map((chip) => `<span>${escapeText(chip)}</span>`).join('');
+      $('project-runner-note').textContent = `Selected: ${project.name}. Run all configured checks or only Browser/API. Each configured check is a separate pytest case; all project checks remain read-only.`;
+    }
+    for (const id of ['runner-browser-button','runner-api-button','runner-all-button']) {
+      $(id).dataset.targetId = project?.id || '';
+      $(id).dataset.permanentlyDisabled = 'false';
+    }
+    $('runner-browser-button').disabled = busy || !project;
+    $('runner-api-button').disabled = busy || !project?.api_url || !apiChecks.length;
+    $('runner-all-button').disabled = busy || !project;
+    select.disabled = busy || !project;
+  }
+  function renderProjects(projects, projectHistory = {}) {
+    const safeProjects = Array.isArray(projects) ? projects : [];
+    renderProjectRunner(safeProjects);
+    const historyByProject = projectHistory && typeof projectHistory === 'object' ? projectHistory : {};
+    const signature = JSON.stringify({projects:safeProjects, history:historyByProject});
+    if (signature === lastProjectsSignature) return;
+    lastProjectsSignature = signature;
+    $('project-count').textContent = `${safeProjects.length} saved project${safeProjects.length === 1 ? '' : 's'}`;
+    if (!safeProjects.length) {
+      $('project-list').innerHTML = '<div class="project-empty">No test projects yet. Add a public website using the form.</div>';
+      return;
+    }
+    $('project-list').innerHTML = safeProjects.map((project) => {
+      const apiReady = Boolean(project.api_url);
+      const storeHost = (() => { try { return new URL(project.store_url).hostname; } catch { return project.store_url; } })();
+      const apiHost = (() => { try { return new URL(project.api_url).hostname; } catch { return project.api_url; } })();
+      const browserChecks = projectBrowserChecks(project);
+      const apiChecks = projectApiChecks(project);
+      const runs = Array.isArray(historyByProject[project.id]) ? historyByProject[project.id] : [];
+      const historyHtml = runs.length ? runs.map((run) => {
+        const typeLabel = run.check_type === 'api' ? 'API' : run.check_type === 'all' ? 'All checks' : 'Browser';
+        const state = ['passed','failed','error','running','interrupted'].includes(run.status) ? run.status : 'error';
+        const summary = run.summary
+          ? `${Number(run.summary.passed || 0)} passed · ${Number(run.summary.failures || 0) + Number(run.summary.errors || 0)} failed · ${Number(run.summary.skipped || 0)} skipped`
+          : (run.message || 'Report summary unavailable');
+        const links = `<span class="run-history-links">${run.log_available ? `<a href="/api/artifact?run_id=${encodeURIComponent(run.run_id)}&kind=log" target="_blank" rel="noopener noreferrer">Log</a>` : ''}${run.report_available ? `<a href="/api/artifact?run_id=${encodeURIComponent(run.run_id)}&kind=report" target="_blank" rel="noopener noreferrer">JUnit</a>` : ''}${run.evidence_available ? `<a href="/api/artifact?run_id=${encodeURIComponent(run.run_id)}&kind=evidence" target="_blank" rel="noopener noreferrer">Failure details</a>` : ''}${Number(run.screenshot_count || 0) ? `<a href="/api/artifact?run_id=${encodeURIComponent(run.run_id)}&kind=screenshot" target="_blank" rel="noopener noreferrer">Screenshot</a>` : ''}</span>`;
+        const failureHtml = Array.isArray(run.failures) && run.failures.length
+          ? `<div class="failure-details">${run.failures.slice(0,3).map((failure) => `${escapeText(failure.test || 'Test')}: ${escapeText(failure.message || 'Failed')}`).join('\n')}</div>` : '';
+        return `<div class="run-history-row"><div class="run-history-main"><span>${typeLabel}</span><span class="run-history-time">${escapeText(formatDate(run.started_at))}</span><span class="run-history-state ${state}">${escapeText(state)}</span>${run.duration != null ? `<span>${Number(run.duration).toFixed(2)}s</span>` : ''}</div>${links}<div class="run-history-summary">${escapeText(summary)}</div>${failureHtml}</div>`;
+      }).join('') : '<div class="run-history-empty">No runs yet. Run a configured check to start the history.</div>';
+      const latestRun = runs[0];
+      const latestRunLabel = latestRun ? `Latest: ${String(latestRun.check_type || 'run').toUpperCase()} · ${String(latestRun.status || 'unknown').toUpperCase()}` : 'No runs yet';
+      const browserRules = browserChecks.reduce((n, check) => n + [check.expected_title, check.expected_h1, check.required_text].filter(Boolean).length, 0);
+      const apiRules = apiChecks.reduce((n, check) => n + (check.json_assertions || []).length + (check.expected_content_type ? 1 : 0), 0);
+      const browserList = browserChecks.map((check) => escapeText(check.name)).join(', ');
+      const apiList = apiChecks.map((check) => `${escapeText(check.name)} (${escapeText(check.path)})`).join(', ');
+      return `<article class="project-card" id="project-card-${escapeText(project.id)}" data-project-card="${escapeText(project.id)}" tabindex="-1">
+        <div class="project-card-head"><div><h3>${escapeText(project.name)}</h3><div class="project-card-url">Storefront: <a href="${escapeText(project.store_url)}" target="_blank" rel="noopener noreferrer">${escapeText(storeHost)}</a><br>Browser checks: ${browserChecks.length} · ${browserList}${apiReady ? `<br>API: <a href="${escapeText(project.api_url)}" target="_blank" rel="noopener noreferrer">${escapeText(apiHost)}</a><br>API checks: ${apiList}` : ''}</div></div><span class="suite-tag ${project.built_in ? '' : 'live'}">${project.built_in ? 'Example' : 'Custom target'}</span></div>
+        <div class="project-card-meta"><span>Browser · ${browserChecks.length} checks · ${browserRules} rules</span><span>${apiReady ? `API GET · ${apiChecks.length} checks · ${apiRules} rules` : 'API not configured'}</span><span>Read-only</span></div>
+        <div class="project-card-actions"><button class="btn btn-primary target-run-button" data-target-id="${escapeText(project.id)}" data-target-run="all" type="button">Run all</button><button class="btn btn-light target-run-button" data-target-id="${escapeText(project.id)}" data-target-run="ui" type="button">Browser</button><button class="btn btn-light target-run-button" data-target-id="${escapeText(project.id)}" data-target-run="api" data-permanently-disabled="${apiReady ? 'false' : 'true'}" type="button" ${apiReady ? '' : 'disabled title="Add an API URL to enable this check"'}>API</button><button class="btn btn-light project-edit-button" data-project-edit="${escapeText(project.id)}" type="button">Edit</button><button class="btn btn-light project-delete-button" data-project-delete="${escapeText(project.id)}" data-permanently-disabled="${project.built_in ? 'true' : 'false'}" type="button" ${project.built_in ? 'disabled title="The built-in example cannot be deleted"' : ''}>Delete</button></div>
+        <details class="project-history"><summary class="project-history-head"><span>Run history · ${runs.length} saved</span><span>${escapeText(latestRunLabel)}</span></summary><div class="project-history-content">${historyHtml}</div></details>
+      </article>`;
+    }).join('');
+    document.querySelectorAll('.target-run-button').forEach((button) => {
+      button.addEventListener('click', () => runTargetCheck(button.dataset.targetId, button.dataset.targetRun, button.closest('.project-card')?.querySelector('h3')?.textContent || 'project'));
+    });
+    document.querySelectorAll('.project-edit-button').forEach((button) => button.addEventListener('click', () => editProject(safeProjects.find((item) => item.id === button.dataset.projectEdit))));
+    document.querySelectorAll('.project-delete-button').forEach((button) => button.addEventListener('click', () => removeProject(button.dataset.projectDelete)));
+    if (busy) setBusy(true);
+  }
+  function renderRecentActivity(projects, projectHistory = {}) {
+    const projectMap = new Map((Array.isArray(projects) ? projects : []).map((project) => [project.id, project]));
+    const grouped = projectHistory && typeof projectHistory === 'object' ? projectHistory : {};
+    const recent = Object.entries(grouped).flatMap(([projectId, runs]) => {
+      const project = projectMap.get(projectId);
+      if (!project || !Array.isArray(runs)) return [];
+      return runs.map((run) => ({project, projectId, run}));
+    }).sort((left, right) => String(right.run.started_at || '').localeCompare(String(left.run.started_at || ''))).slice(0, 6);
+    const container = $('recent-activity-list');
+    if (!recent.length) {
+      container.innerHTML = '<div class="project-empty">No saved-project runs yet. Add a website and run Browser or API checks to see recent activity here.</div>';
+      return;
+    }
+    container.innerHTML = recent.map(({project, projectId, run}) => {
+      const status = ['passed','failed','error','running','interrupted'].includes(run.status) ? run.status : 'error';
+      const type = run.check_type === 'api' ? 'API' : run.check_type === 'all' ? 'All checks' : 'Browser';
+      const summary = run.summary
+        ? `${Number(run.summary.passed || 0)} passed · ${Number(run.summary.failures || 0) + Number(run.summary.errors || 0)} failed`
+        : (run.message || 'Summary unavailable');
+      const duration = run.duration == null ? '' : `${Number(run.duration).toFixed(2)}s`;
+      return `<article class="recent-activity-row"><div class="recent-activity-main"><strong>${escapeText(project.name)}</strong><span>${type} · ${escapeText(formatDate(run.started_at))}</span><small>${escapeText(summary)}</small></div><div class="recent-activity-meta"><span class="run-history-state ${status}">${escapeText(status)}</span>${duration ? `<span class="recent-activity-duration">${duration}</span>` : ''}<a href="#project-card-${escapeText(projectId)}" data-open-project-history="${escapeText(projectId)}">View history</a></div></article>`;
+    }).join('');
+  }
+  function newCheckId(prefix) { return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`; }
+  function updateCheckManagerCounts() {
+    const browserCount = $('browser-checks-editor').querySelectorAll('[data-browser-check]').length;
+    const apiCount = $('api-checks-editor').querySelectorAll('[data-api-check]').length;
+    $('browser-check-count').textContent = `${browserCount} configured`;
+    $('api-check-count').textContent = `${apiCount} configured`;
+  }
+  function bindCheckEditorSummary(row, kind, index) {
+    const update = () => {
+      const name = row.querySelector('[data-field="name"]')?.value.trim() || `${kind} check ${index + 1}`;
+      const path = row.querySelector('[data-field="path"]')?.value.trim() || (kind === 'Browser' ? '/' : '/');
+      row.querySelector('[data-check-summary-name]').textContent = name;
+      row.querySelector('[data-check-summary-path]').textContent = path;
+    };
+    row.querySelectorAll('[data-field="name"], [data-field="path"]').forEach((field) => field.addEventListener('input', update));
+    update();
+  }
+  function renderBrowserChecks(checks, options = {}) {
+    const manager = $('browser-checks-manager');
+    const keepManagerOpen = manager.open || Boolean(options.openManager);
+    const items = Array.isArray(checks) && checks.length ? checks : [{id:newCheckId('browser'),name:'Homepage',path:'',expected_title:'',expected_h1:'',required_text:''}];
+    $('browser-checks-editor').innerHTML = items.map((check, index) => `<details class="check-editor-row" data-browser-check data-check-id="${escapeText(check.id || newCheckId('browser'))}">
+      <summary class="check-editor-summary"><span class="check-editor-summary-title"><strong>Browser ${index + 1}</strong><span data-check-summary-name>${escapeText(check.name || `Browser check ${index + 1}`)}</span></span><span class="check-editor-summary-path" data-check-summary-path>${escapeText(check.path || '/')}</span></summary>
+      <div class="check-editor-content"><div class="check-editor-head"><span>Browser check settings</span><button class="check-remove" type="button" data-remove-check="browser" ${items.length === 1 ? 'disabled title="At least one Browser check is required"' : ''}>Remove check</button></div>
+      <div class="check-editor-grid">
+        <div class="project-field"><label>Check name</label><input data-field="name" maxlength="60" value="${escapeText(check.name || `Browser check ${index + 1}`)}" placeholder="Homepage"></div>
+        <div class="project-field"><label>Page path (same host)</label><input data-field="path" maxlength="512" value="${escapeText(check.path || '')}" placeholder="/products"></div>
+        <div class="project-field"><label>Page title contains</label><input data-field="expected_title" maxlength="200" value="${escapeText(check.expected_title || '')}" placeholder="Shop online"></div>
+        <div class="project-field"><label>Visible H1 contains</label><input data-field="expected_h1" maxlength="200" value="${escapeText(check.expected_h1 || '')}" placeholder="Products"></div>
+        <div class="project-field" style="grid-column:1/-1"><label>Visible page text contains</label><input data-field="required_text" maxlength="200" value="${escapeText(check.required_text || '')}" placeholder="Free delivery"></div>
+      </div></div></details>`).join('');
+    manager.open = keepManagerOpen;
+    $('browser-checks-editor').querySelectorAll('[data-browser-check]').forEach((row, index) => bindCheckEditorSummary(row, 'Browser', index));
+    $('browser-checks-editor').querySelectorAll('[data-remove-check="browser"]').forEach((button) => button.addEventListener('click', () => {
+      const values = readBrowserChecks().filter((item) => item.id !== button.closest('[data-browser-check]').dataset.checkId);
+      renderBrowserChecks(values, {openManager:true});
+    }));
+    if (options.expandLatest) {
+      manager.open = true;
+      const latest = $('browser-checks-editor').lastElementChild;
+      if (latest) latest.open = true;
+    }
+    updateCheckManagerCounts();
+  }
+  function renderApiChecks(checks, options = {}) {
+    const manager = $('api-checks-manager');
+    const keepManagerOpen = manager.open || Boolean(options.openManager);
+    const items = Array.isArray(checks) ? checks : [];
+    $('api-checks-editor').innerHTML = items.length ? items.map((check, index) => `<details class="check-editor-row" data-api-check data-check-id="${escapeText(check.id || newCheckId('api'))}">
+      <summary class="check-editor-summary"><span class="check-editor-summary-title"><strong>API ${index + 1}</strong><span data-check-summary-name>${escapeText(check.name || `API check ${index + 1}`)}</span></span><span class="check-editor-summary-path" data-check-summary-path>${escapeText(check.path || '/')}</span></summary>
+      <div class="check-editor-content"><div class="check-editor-head"><span>API check settings</span><button class="check-remove" type="button" data-remove-check="api" ${items.length === 1 ? 'disabled title="At least one API check is required"' : ''}>Remove check</button></div>
+      <div class="check-editor-grid">
+        <div class="project-field"><label>Check name</label><input data-field="name" maxlength="60" value="${escapeText(check.name || `API check ${index + 1}`)}" placeholder="Products endpoint"></div>
+        <div class="project-field"><label>Read-only GET path</label><input data-field="path" maxlength="512" value="${escapeText(check.path || '/') }" placeholder="/products"></div>
+        <div class="project-field"><label>Expected HTTP status</label><input data-field="expected_status" type="number" min="100" max="599" value="${Number(check.expected_status || 200)}"></div>
+        <div class="project-field"><label>Content-Type contains</label><input data-field="expected_content_type" maxlength="120" value="${escapeText(check.expected_content_type || '')}" placeholder="application/json"></div>
+        <div class="project-field" style="grid-column:1/-1"><label>Expected JSON fields · optional</label><textarea data-field="json_assertions" rows="3" placeholder="data[0].id = 1&#10;status = ok">${escapeText(renderJsonAssertions(check.json_assertions || []))}</textarea><small>One assertion per line: field.path = value. Only GET requests are sent.</small></div>
+      </div></div></details>`).join('') : '<div class="project-empty">Add an API base URL, then add one or more GET endpoint checks.</div>';
+    manager.open = keepManagerOpen;
+    $('api-checks-editor').querySelectorAll('[data-api-check]').forEach((row, index) => bindCheckEditorSummary(row, 'API', index));
+    $('api-checks-editor').querySelectorAll('[data-remove-check="api"]').forEach((button) => button.addEventListener('click', () => {
+      const values = readApiChecks().filter((item) => item.id !== button.closest('[data-api-check]').dataset.checkId);
+      renderApiChecks(values, {openManager:true});
+    }));
+    if (options.expandLatest) {
+      manager.open = true;
+      const latest = $('api-checks-editor').lastElementChild;
+      if (latest && latest.matches('[data-api-check]')) latest.open = true;
+    }
+    updateCheckManagerCounts();
+    syncApiFields();
+  }
+  function readBrowserChecks() {
+    return [...$('browser-checks-editor').querySelectorAll('[data-browser-check]')].map((row) => ({
+      id: row.dataset.checkId, name: row.querySelector('[data-field="name"]').value.trim(),
+      path: row.querySelector('[data-field="path"]').value.trim(),
+      expected_title: row.querySelector('[data-field="expected_title"]').value.trim(),
+      expected_h1: row.querySelector('[data-field="expected_h1"]').value.trim(),
+      required_text: row.querySelector('[data-field="required_text"]').value.trim(),
+    }));
+  }
+  function readApiChecks() {
+    return [...$('api-checks-editor').querySelectorAll('[data-api-check]')].map((row) => ({
+      id: row.dataset.checkId, name: row.querySelector('[data-field="name"]').value.trim(),
+      path: row.querySelector('[data-field="path"]').value.trim(),
+      expected_status: Number(row.querySelector('[data-field="expected_status"]').value || 200),
+      expected_content_type: row.querySelector('[data-field="expected_content_type"]').value.trim(),
+      json_assertions: parseJsonAssertions(row.querySelector('[data-field="json_assertions"]').value),
+    }));
+  }
+  function syncApiFields() {
+    const enabled = Boolean($('project-api-url').value.trim());
+    const editor = $('api-checks-editor');
+    $('add-api-check').disabled = !enabled || editor.querySelectorAll('[data-api-check]').length >= 20;
+    editor.querySelectorAll('input,textarea,button').forEach((element) => { element.disabled = !enabled || (element.matches('[data-remove-check]') && editor.querySelectorAll('[data-api-check]').length === 1); });
+    if (enabled && !editor.querySelector('[data-api-check]')) renderApiChecks([{id:newCheckId('api'),name:'API endpoint',path:'/products',expected_status:200,expected_content_type:'',json_assertions:[]}], {openManager:true, expandLatest:true});
+    updateCheckManagerCounts();
+  }
+  function resetProjectForm() {
+    $('project-form').reset();
+    $('project-id').value = '';
+    $('project-form-title').textContent = 'Add a test project';
+    $('project-save').textContent = 'Add project';
+    $('project-reset').textContent = 'Reset form';
+    renderBrowserChecks([{id:newCheckId('browser'),name:'Homepage',path:'',expected_title:'',expected_h1:'',required_text:''}]);
+    renderApiChecks([]);
+    document.querySelectorAll('#project-form > .project-fields > details').forEach((details) => { details.open = false; });
+    syncApiFields();
+  }
+  function renderJsonAssertions(assertions) {
+    if (!Array.isArray(assertions)) return '';
+    return assertions.map((item) => `${item.path} = ${JSON.stringify(item.expected)}`).join('\n');
+  }
+  function parseJsonAssertions(text) {
+    const lines = String(text || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    if (lines.length > 20) throw new Error('Use no more than 20 JSON field assertions per API check.');
+    return lines.map((line, index) => {
+      const equals = line.indexOf('=');
+      if (equals < 1) throw new Error(`Line ${index + 1}: use field.path = value.`);
+      const path = line.slice(0, equals).trim();
+      const rawValue = line.slice(equals + 1).trim();
+      if (!/^[A-Za-z_][A-Za-z0-9_-]*(?:\[(?:0|[1-9]\d*)\])?(?:\.[A-Za-z_][A-Za-z0-9_-]*(?:\[(?:0|[1-9]\d*)\])?)*$/.test(path)) throw new Error(`Line ${index + 1}: use dotted object keys, for example data.status.`);
+      if (!rawValue) throw new Error(`Line ${index + 1}: expected value is empty.`);
+      let expected;
+      try { expected = JSON.parse(rawValue); } catch { expected = rawValue; }
+      if (expected !== null && !['string','number','boolean'].includes(typeof expected)) throw new Error(`Line ${index + 1}: use a string, number, true, false or null.`);
+      if (typeof expected === 'string' && expected.length > 200) throw new Error(`Line ${index + 1}: value is too long (maximum 200 characters).`);
+      return {path, expected};
+    });
+  }
+  function editProject(project) {
+    if (!project) return;
+    $('project-id').value = project.id;
+    $('project-name').value = project.name;
+    $('project-store-url').value = project.store_url;
+    $('project-api-url').value = project.api_url || '';
+    renderBrowserChecks(projectBrowserChecks(project));
+    renderApiChecks(projectApiChecks(project));
+    $('project-form-title').textContent = `Editing: ${project.name}`;
+    $('project-save').textContent = 'Update project';
+    $('project-reset').textContent = 'Cancel edit';
+    $('browser-checks-manager').open = true;
+    $('api-checks-manager').open = Boolean(project.api_url);
+    const firstBrowser = $('browser-checks-editor').querySelector('[data-browser-check]');
+    const firstApi = $('api-checks-editor').querySelector('[data-api-check]');
+    if (firstBrowser) firstBrowser.open = true;
+    if (firstApi) firstApi.open = true;
+    syncApiFields();
+    $('project-form').scrollIntoView({behavior:'smooth', block:'start'});
+    $('project-name').focus();
+  }
+  async function saveProject(event) {
+    event.preventDefault();
+    if (busy) return;
+    const isEditing = Boolean($('project-id').value);
+    const apiUrl = $('project-api-url').value.trim();
+    let browserChecks, apiChecks;
+    try {
+      browserChecks = readBrowserChecks();
+      apiChecks = apiUrl ? readApiChecks() : [];
+      if (!browserChecks.length) throw new Error('Add at least one Browser check.');
+      if (apiUrl && !apiChecks.length) throw new Error('Add at least one API check or clear the API URL.');
+      if (browserChecks.length > 20 || apiChecks.length > 20) throw new Error('A project can contain at most 20 checks of each type.');
+    } catch (error) { showToast(error.message); return; }
+    const payload = {
+      id: $('project-id').value || undefined,
+      name: $('project-name').value.trim(),
+      store_url: $('project-store-url').value.trim(),
+      api_url: apiUrl,
+      browser_checks: browserChecks,
+      api_checks: apiChecks,
+    };
+    try {
+      const response = await fetch('/api/projects', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+      lastProjectsSignature = '';
+      if (!isEditing && result.project?.id) selectedRunnerProjectId = result.project.id;
+      renderProjects(result.projects);
+      resetProjectForm();
+      showToast(isEditing ? 'Project updated' : 'New project added');
+      await refresh();
+    } catch (error) { showToast(error.message || 'Could not save test project'); }
+  }
+  async function removeProject(projectId) {
+    if (busy || !window.confirm('Delete this saved test project? ShopGuard will create an automatic backup first.')) return;
+    try {
+      const response = await fetch('/api/projects/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:projectId})});
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+      lastProjectsSignature = '';
+      renderProjects(result.projects);
+      if ($('project-id').value === projectId) resetProjectForm();
+      showToast('Test project removed · backup created');
+      await refresh();
+    } catch (error) { showToast(error.message || 'Could not delete test project'); }
+  }
+  async function runTargetCheck(projectId, checkType, projectName) {
+    if (busy || targetRunPending) return;
+    const labels = {api:'API GET checks',ui:'Browser smoke checks',all:'All project checks'};
+    const details = {api:'the configured read-only GET endpoints',ui:'the configured pages in a temporary browser',all:'all configured Browser and API checks'};
+    const label = labels[checkType] || 'Project checks';
+    const savedProject = savedProjects.find((project) => project.id === projectId);
+    const resolvedProjectName = savedProject?.name || (projectName && projectName.toLowerCase() !== 'project' ? projectName : 'Practice Software Testing');
+
+    // Lock immediately, before opening the blocking confirmation dialog. This prevents
+    // a second click from opening another dialog or submitting another run request.
+    targetRunPending = true;
+    setBusy(true);
+    const confirmed = window.confirm(`${label} for ${resolvedProjectName} will run ${details[checkType]}. No sign-in, form submission or purchase action will be performed. Continue?`);
+    if (!confirmed) {
+      targetRunPending = false;
+      setBusy(false);
+      return;
+    }
+
+    let accepted = false;
+    try {
+      const response = await fetch('/api/target-run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:projectId, check:checkType})});
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+      accepted = true;
+      lastLog = '';
+      showToast(`${label} started`);
+      await refresh();
+    } catch (error) {
+      showToast(error.message || 'Could not start target check');
+      await refresh();
+    } finally {
+      targetRunPending = false;
+      if (!accepted) setBusy(false);
+    }
+  }
+  function renderAnalytics(projects, analyticsByProject) {
+    const values = Array.isArray(projects) ? projects : [];
+    const analytics = analyticsByProject && typeof analyticsByProject === 'object' ? analyticsByProject : {};
+    if (!values.length) { $('analytics-list').innerHTML = '<div class="project-empty">Add a project and run checks to see analytics.</div>'; return; }
+    $('analytics-list').innerHTML = values.map((project) => {
+      const data = analytics[project.id] || {};
+      const trend = Array.isArray(data.trend) ? data.trend : [];
+      const bars = trend.map((run) => {
+        const height = Math.max(7, Math.min(100, (Number(run.duration || 0) / Math.max(1, ...trend.map((item) => Number(item.duration || 0)))) * 100));
+        const state = ['passed','failed','error'].includes(run.status) ? run.status : '';
+        return `<span class="analytics-bar ${state}" style="height:${height}%" title="${escapeText(formatDate(run.started_at))} · ${escapeText(run.status)} · ${Number(run.duration || 0).toFixed(2)}s"></span>`;
+      }).join('');
+      const delta = data.duration_delta == null ? 'Not enough runs to compare duration.' : `Latest run ${data.duration_delta > 0 ? 'took ' + data.duration_delta + 's longer' : data.duration_delta < 0 ? 'was ' + Math.abs(data.duration_delta) + 's faster' : 'matched'} than the previous run.`;
+      return `<article class="analytics-card"><div class="analytics-card-head"><div><h3>${escapeText(project.name)}</h3><div class="analytics-host">${escapeText(project.store_url)}</div></div><span class="run-history-state ${escapeText(data.latest_status || 'interrupted')}">${escapeText(data.latest_status || 'no runs')}</span></div>
+        <div class="analytics-metrics"><div class="analytics-metric"><strong>${data.completed_runs || 0}</strong><span>Runs</span></div><div class="analytics-metric"><strong>${data.success_rate == null ? '—' : data.success_rate + '%'}</strong><span>Pass rate</span></div><div class="analytics-metric"><strong>${data.failed || 0}</strong><span>Failed</span></div><div class="analytics-metric"><strong>${data.average_duration == null ? '—' : data.average_duration + 's'}</strong><span>Avg duration</span></div></div>
+        <div class="analytics-trend" aria-label="Recent run duration trend">${bars || '<span class="analytics-caption">No completed runs yet.</span>'}</div><div class="analytics-caption">Bars show duration; green = passed, red = failed. ${trend.length} recent runs.</div><div class="analytics-compare">${escapeText(delta)}</div></article>`;
+    }).join('');
+  }
+  function renderBackups(backups) {
+    const items = Array.isArray(backups) ? backups : [];
+    $('backup-list').innerHTML = items.length ? items.map((backup) => `<div class="backup-row"><span>${escapeText(backup.filename)} · ${(Number(backup.size || 0) / 1024).toFixed(1)} KB · ${escapeText(formatDate(backup.created_at))}${Number(backup.omitted_artifact_count || 0) ? ` · ${Number(backup.omitted_artifact_count)} evidence file(s) omitted` : ''}</span><a href="/api/backup/download?name=${encodeURIComponent(backup.filename)}">Download</a></div>`).join('') : '<div class="project-empty">No backups yet. Create one now or let ShopGuard create automatic backups before edits and deletions.</div>';
+  }
+  async function createBackup() {
+    try {
+      const response = await fetch('/api/backup/create', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'});
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+      const omitted = Number(result.backup.omitted_artifact_count || 0);
+      $('backup-status').textContent = `Backup created: ${result.backup.filename}. Saved projects and history are included${omitted ? `; ${omitted} referenced evidence/report file(s) were omitted by the 15 MB artifact limit` : ', along with available logs/reports/evidence'}. Download the ZIP to keep a copy outside this folder.`;
+      showToast('Backup created');
+      await refresh();
+    } catch (error) { $('backup-status').textContent = error.message || 'Could not create backup.'; }
+  }
+  async function restoreBackup(file) {
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) { showToast('Backup file exceeds the 20 MB limit.'); return; }
+    if (!window.confirm(`Restore ${file.name}? ShopGuard will validate the backup and create an automatic backup of the current data before replacing it.`)) return;
+    try {
+      setBusy(true);
+      const response = await fetch('/api/backup/restore', {method:'POST', headers:{'Content-Type':'application/zip'}, body:file});
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+      selectedRunnerProjectId = '';
+      lastProjectsSignature = '';
+      const omitted = Number(result.omitted_artifacts_in_backup || 0);
+      $('backup-status').textContent = `Restored ${result.projects_restored} project(s), ${result.runs_restored} run(s) and ${result.artifacts_restored} evidence/report file(s)${omitted ? `; the backup had omitted ${omitted} older/large file(s) due to the artifact size limit` : ''}.`;
+      showToast('Backup restored');
+      await refresh();
+    } catch (error) { $('backup-status').textContent = error.message || 'Could not restore backup.'; }
+    finally { setBusy(false); $('backup-file').value = ''; }
+  }
+
+  $('recent-activity-list').addEventListener('click', (event) => {
+    const link = event.target.closest('[data-open-project-history]');
+    if (!link) return;
+    const card = $('project-card-' + link.dataset.openProjectHistory);
+    const history = card?.querySelector('.project-history');
+    if (history) history.open = true;
+  });
+  $('project-form').addEventListener('submit', saveProject);
+  $('project-reset').addEventListener('click', resetProjectForm);
+  $('project-runner-select').addEventListener('change', () => { selectedRunnerProjectId = $('project-runner-select').value; renderProjectRunner(savedProjects); });
+  $('runner-browser-button').addEventListener('click', () => { const project = savedProjects.find((item) => item.id === selectedRunnerProjectId); if (project) runTargetCheck(project.id, 'ui', project.name); });
+  $('runner-api-button').addEventListener('click', () => { const project = savedProjects.find((item) => item.id === selectedRunnerProjectId); if (project?.api_url) runTargetCheck(project.id, 'api', project.name); });
+  $('runner-all-button').addEventListener('click', () => { const project = savedProjects.find((item) => item.id === selectedRunnerProjectId); if (project) runTargetCheck(project.id, 'all', project.name); });
+  $('project-api-url').addEventListener('input', syncApiFields);
+  $('add-browser-check').addEventListener('click', () => {
+    const values = readBrowserChecks();
+    if (values.length >= 20) { showToast('A project can contain up to 20 Browser checks.'); return; }
+    values.push({id:newCheckId('browser'),name:`Browser check ${values.length + 1}`,path:'',expected_title:'',expected_h1:'',required_text:''});
+    renderBrowserChecks(values, {openManager:true, expandLatest:true});
+  });
+  $('add-api-check').addEventListener('click', () => {
+    if (!$('project-api-url').value.trim()) { showToast('Add an API base URL first.'); return; }
+    try {
+      const values = readApiChecks();
+      if (values.length >= 20) { showToast('A project can contain up to 20 API checks.'); return; }
+      values.push({id:newCheckId('api'),name:`API check ${values.length + 1}`,path:'/',expected_status:200,expected_content_type:'',json_assertions:[]});
+      renderApiChecks(values, {openManager:true, expandLatest:true});
+    } catch (error) { showToast(error.message); }
+  });
+  $('backup-create').addEventListener('click', createBackup);
+  $('backup-restore-button').addEventListener('click', () => $('backup-file').click());
+  $('backup-file').addEventListener('change', (event) => restoreBackup(event.target.files?.[0]));
+  renderBrowserChecks([{id:newCheckId('browser'),name:'Homepage',path:'',expected_title:'',expected_h1:'',required_text:''}]);
+  renderApiChecks([]);
+  syncApiFields();
+
+  async function refresh() {
+    try {
+      const response = await fetch('/api/status', {cache:'no-store'});
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      $('connection-label').textContent = 'Connected';
+      $('connection-chip').style.color = '#16846f';
+      $('connection-chip').style.borderColor = '#cfece4';
+      const current = data.current_run;
+      const run = current || data.last_run;
+      setBusy(Boolean(data.running) || Boolean(data.scan_running));
+      updateRunButtons(current);
+      updateMetrics(run, Boolean(data.running));
+      updateUrlScan(data.current_scan, data.last_scan, Boolean(data.running) || Boolean(data.scan_running));
+      updateTargets(data.targets);
+      renderProjects(data.projects, data.project_history);
+      renderRecentActivity(data.projects, data.project_history);
+      renderAnalytics(data.projects, data.project_analytics);
+      renderBackups(data.backups);
+      const log = data.log_tail || '';
+      if (log !== lastLog) {
+        $('console-output').textContent = log || 'Test results will appear here. Start with Local checks before running online tests.';
+        $('console-output').scrollTop = $('console-output').scrollHeight;
+        lastLog = log;
+      }
+    } catch (error) {
+      $('connection-label').textContent = 'ShopGuard unavailable';
+      $('connection-chip').style.color = '#b63c4d';
+      $('connection-chip').style.borderColor = '#f0cbd1';
+      $('console-status').textContent = 'Cannot connect to ShopGuard';
+    }
+  }
+  function setScanButtonBusy(value) {
+    const button = $('scan-button');
+    button.disabled = value;
+    if (value) {
+      if (!scanButtonOriginal) scanButtonOriginal = button.innerHTML;
+      button.innerHTML = '<span class="spinner" aria-hidden="true"></span> Checking…';
+    } else if (scanButtonOriginal) {
+      button.innerHTML = scanButtonOriginal;
+      scanButtonOriginal = null;
+    }
+  }
+  function updateUrlScan(current, last, anyBusy) {
+    setScanButtonBusy(anyBusy);
+    const status = $('scan-status');
+    const results = $('scan-results');
+    if (current) {
+      if (activeScanId !== current.scan_id) {
+        activeScanId = current.scan_id;
+        results.hidden = true;
+        results.innerHTML = '';
+      }
+      status.dataset.state = 'running';
+      status.textContent = `Checking ${current.url || 'website'}… This may take a few seconds.`;
+      return;
+    }
+    if (last && last.scan_id && last.scan_id !== lastRenderedScanId) {
+      lastRenderedScanId = last.scan_id;
+      activeScanId = null;
+      if (last.status === 'error' || !last.result) {
+        status.dataset.state = 'error';
+        status.textContent = `Website check could not be completed: ${last.error || 'Please try again.'}`;
+        results.hidden = true;
+        results.innerHTML = '';
+        return;
+      }
+      const result = last.result;
+      const summary = result.summary || {};
+      const coverage = result.coverage || {};
+      const badges = {pass:'PASS', warning:'WARN', fail:'FAIL', info:'INFO'};
+      const findingLabels = {
+        check_passed:'Check passed', potential_issue:'Potential issue', recommendation:'Recommendation',
+        not_tested:'Not tested', scan_limit:'Scan limitation', environment_signal:'Environment signal', information:'Information'
+      };
+      const severityLabels = {none:'None', low:'Low', medium:'Medium', high:'High'};
+      const confidenceLabels = {none:'N/A', low:'Low', medium:'Medium', high:'High'};
+      const statusPriority = {fail:0, warning:1, info:2, pass:3};
+      const displayChecks = [...(result.checks || [])].sort((left, right) => {
+        const byStatus = (statusPriority[left.status] ?? 2) - (statusPriority[right.status] ?? 2);
+        if (byStatus !== 0) return byStatus;
+        const severityPriority = {high:0, medium:1, low:2, none:3};
+        return (severityPriority[left.severity] ?? 3) - (severityPriority[right.severity] ?? 3);
+      });
+      const renderCheck = (check) => {
+        const state = ['pass','warning','fail','info'].includes(check.status) ? check.status : 'info';
+        const findingType = findingLabels[check.finding_type] || 'Information';
+        const severity = severityLabels[check.severity] || 'None';
+        const confidence = confidenceLabels[check.confidence] || 'N/A';
+        const severityClass = ['low','medium','high'].includes(check.severity) ? ` severity-${check.severity}` : '';
+        const insight = state === 'pass' ? '' : `<div class="scan-insight"><div><strong>Why it matters:</strong> ${escapeText(check.impact || 'This result needs context before it can be classified.')}</div><div><strong>Next step:</strong> ${escapeText(check.next_step || 'Review the observation and reproduce it before reporting a defect.')}</div></div>`;
+        return `<div class="scan-check"><div><span class="scan-badge ${state}">${badges[state]}</span></div><div><strong>${escapeText(check.name)}</strong><div class="scan-meta"><span>${escapeText(check.category || 'General')}</span><span>${escapeText(findingType)}</span><span class="${severityClass.trim()}">Severity: ${escapeText(severity)}</span><span>Confidence: ${escapeText(confidence)}</span></div><p>${escapeText(check.detail)}</p>${insight}</div></div>`;
+      };
+      const checkGroups = [
+        {status:'fail', label:'Failed checks', hint:'Needs investigation', open:true},
+        {status:'warning', label:'Warnings to review', hint:'Potential issues or environment signals', open:true},
+        {status:'info', label:'Info and scan limitations', hint:'Not tested, recommendations or limits', open:false},
+        {status:'pass', label:'Passed checks', hint:'Checks observed as OK', open:false},
+      ].map((group) => ({...group, items:displayChecks.filter((check) => (['pass','warning','fail','info'].includes(check.status) ? check.status : 'info') === group.status)})).filter((group) => group.items.length);
+      const checkGroupsHtml = checkGroups.map((group) => `<details class="scan-group" data-status="${group.status}" ${group.open ? 'open' : ''}><summary>${escapeText(group.label)}<span>${group.items.length} · ${escapeText(group.hint)}</span></summary><div class="scan-checks">${group.items.map(renderCheck).join('')}</div></details>`).join('');
+      const coverageItems = [];
+      coverageItems.push(coverage.browser_inspected ? 'Browser inspection completed' : 'HTML-only inspection');
+      coverageItems.push(`Links checked: ${Number(coverage.links_checked || 0)}${coverage.max_links_checked ? ` / ${Number(coverage.max_links_checked)} sampled` : ''}`);
+      if (coverage.browser_inspected) {
+        const attempts = Number(coverage.browser_requests_observed || 0);
+        const allowed = Number(coverage.browser_requests_allowed || 0);
+        const blocked = Number(coverage.browser_requests_blocked || 0);
+        const limit = Number(coverage.browser_request_limit || 0);
+        coverageItems.push(`Browser requests: ${attempts} attempted; ${allowed} allowed (maximum ${limit}); ${blocked} blocked by scanner policy`);
+      }
+      if (coverage.html_truncated) coverageItems.push('HTML response truncated at safety limit');
+      const coverageHtml = `<div class="scan-coverage" aria-label="Scan coverage">${coverageItems.map(item => `<span>${escapeText(item)}</span>`).join('')}</div>`;
+      const hasWarnings = Number(summary.warnings || 0) > 0;
+      const hasFailures = Number(summary.failed || 0) > 0;
+      const resultLabel = hasFailures ? 'Review findings' : hasWarnings ? 'Review warnings' : 'Checks completed';
+      results.innerHTML = `<div class="scan-result-head"><div><h3>Website check results</h3><div class="scan-result-url">${escapeText(result.final_url || result.url || last.url)}</div></div><span class="suite-tag ${hasFailures || hasWarnings ? 'live' : ''}">${resultLabel}</span></div>
+        <div class="scan-summary"><div class="scan-summary-item"><strong>${Number(summary.passed || 0)}</strong><span>Passed</span></div><div class="scan-summary-item"><strong>${Number(summary.warnings || 0)}</strong><span>Warnings</span></div><div class="scan-summary-item"><strong>${Number(summary.failed || 0)}</strong><span>Failed</span></div><div class="scan-summary-item"><strong>${Number(summary.info || 0)}</strong><span>Info</span></div></div>
+        ${coverageHtml}<div class="scan-groups">${checkGroupsHtml}</div><p class="scan-footnote">${escapeText(result.note || '')} · Finished in ${Number(last.duration || 0)}s.</p>`;
+      results.hidden = false;
+      status.dataset.state = hasFailures ? 'error' : hasWarnings ? 'warning' : '';
+      status.textContent = hasFailures ? `The check found ${summary.failed} failed item(s). Reproduce each finding before reporting a defect.` : hasWarnings ? `The check finished for ${result.url || last.url}; review the ${summary.warnings} warning(s). Warnings can reflect site issues, access policy or network conditions.` : `The check finished for ${result.url || last.url}. Review the coverage and limitations; these results do not prove that the whole site is defect-free.`;
+      return;
+    }
+    if (!last) {
+      status.dataset.state = '';
+      status.textContent = 'Enter a public website address. Local and private addresses are blocked.';
+      results.hidden = true;
+      results.innerHTML = '';
+      lastRenderedScanId = null;
+    }
+  }
+  async function scanWebsite(event) {
+    event.preventDefault();
+    if (busy) return;
+    const url = $('scan-url').value.trim();
+    if (!$('scan-authorized').checked) {
+      showToast('Confirm that you own this website or have permission to check it.');
+      return;
+    }
+    if (!url) return;
+    if (!window.confirm('ShopGuard will open this public website in a temporary browser and make a few read-only checks. It will not sign in, click buttons, send forms, change the cart or place orders. Continue?')) return;
+    try {
+      setBusy(true);
+      setScanButtonBusy(true);
+      const response = await fetch('/api/scan', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url})
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+      activeScanId = result.scan_id;
+      lastRenderedScanId = null;
+      $('scan-results').hidden = true;
+      $('scan-status').dataset.state = 'running';
+      $('scan-status').textContent = 'Website check started. Keep this page open until it finishes.';
+      showToast('Website check started');
+      await refresh();
+    } catch (error) {
+      setBusy(false);
+      setScanButtonBusy(false);
+      showToast(error.message || 'Could not start the website check');
+      await refresh();
+    }
+  }
+  $('scan-form').addEventListener('submit', scanWebsite);
+  async function runSuite(suite) {
+    if (busy) return;
+    const names = {unit:'Local checks', api_smoke:'API checks', ui_smoke:'Browser checks', regression:'Full check (no changes)'};
+    const live = suite !== 'unit';
+    if (live && !window.confirm(`${names[suite]} will connect to the public demo shop. Continue?`)) return;
+    try {
+      const response = await fetch('/api/run', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({suite})
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+      showToast(`${names[suite]} started`);
+      lastLog = '';
+      await refresh();
+    } catch (error) {
+      showToast(error.message || 'Could not start the tests');
+      await refresh();
+    }
+  }
+  document.querySelectorAll('.run-button').forEach((button) => button.addEventListener('click', () => runSuite(button.dataset.run)));
+  $('refresh-button').addEventListener('click', () => { refresh(); showToast('Status updated'); });
+  const navLinks = [...document.querySelectorAll('.nav a[href^="#"]')];
+  const navTargets = navLinks
+    .map((link) => ({link, target:$(link.getAttribute('href').slice(1))}))
+    .filter((item) => item.target)
+    .sort((a, b) => {
+      const position = a.target.compareDocumentPosition(b.target);
+      if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+      if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+      return 0;
+    });
+  function setActiveNav(link) {
+    navLinks.forEach((item) => {
+      const active = item === link;
+      item.classList.toggle('active', active);
+      if (active) item.setAttribute('aria-current', 'location');
+      else item.removeAttribute('aria-current');
+    });
+  }
+  function updateActiveNavOnScroll() {
+    if (!navTargets.length) return;
+    const documentHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    const maxScroll = Math.max(0, documentHeight - window.innerHeight);
+    const atPageBottom = maxScroll > 80 && window.scrollY >= maxScroll - 12;
+    let current = null;
+    if (atPageBottom) {
+      // At the bottom, the last page section is authoritative even when its top
+      // is above the normal activation line and no further scroll event follows.
+      const lastVisible = navTargets.filter(({target}) => {
+        const rect = target.getBoundingClientRect();
+        return rect.top < window.innerHeight && rect.bottom > 0;
+      }).at(-1);
+      current = lastVisible?.link || navTargets.at(-1)?.link || null;
+    } else {
+      const activationLine = Math.min(190, Math.max(110, window.innerHeight * 0.26));
+      // Do not break on the first target below the line: dynamically sized
+      // sections/cards can make target geometry differ slightly from menu order.
+      const passed = navTargets.filter(({target}) => target.getBoundingClientRect().top <= activationLine);
+      current = passed.at(-1)?.link || navTargets[0]?.link || null;
+    }
+    if (current) setActiveNav(current);
+  }
+  let navScrollQueued = false;
+  window.addEventListener('scroll', () => {
+    if (navScrollQueued) return;
+    navScrollQueued = true;
+    window.requestAnimationFrame(() => {
+      navScrollQueued = false;
+      updateActiveNavOnScroll();
+    });
+  }, {passive:true});
+  window.addEventListener('resize', updateActiveNavOnScroll);
+  window.addEventListener('hashchange', updateActiveNavOnScroll);
+  window.addEventListener('pageshow', updateActiveNavOnScroll);
+  navLinks.forEach((link) => link.addEventListener('click', () => setActiveNav(link)));
+  updateActiveNavOnScroll();
+  refresh();
+  setInterval(refresh, 1800);
+})();
+</script>
+</body>
+</html>

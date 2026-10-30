@@ -1,0 +1,124 @@
+name: ShopGuard QA
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_live_smoke:
+        description: Run a small read-only smoke suite against the public Toolshop environment
+        required: false
+        type: boolean
+        default: false
+      run_live_regression:
+        description: Run the broader read-only API and browser regression suite against the public Toolshop environment
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shopguard-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-contract-tests:
+    name: Offline checks (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13', '3.14']
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Compile Python sources
+        run: python -m compileall -q shopguard pages tests scripts dashboard
+      - name: Run offline unit and contract checks
+        run: python -m pytest -m unit -v --junitxml=unit-results.xml
+      - name: Upload offline test report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: offline-test-results-python-${{ matrix.python-version }}
+          path: unit-results.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+  live-readonly-smoke:
+    name: Live read-only smoke tests
+    if: github.event_name == 'workflow_dispatch' && inputs.run_live_smoke
+    needs: offline-contract-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+      - name: Run API and browser smoke tests
+        run: python -m pytest -m '(api or ui) and smoke' -v --junitxml=live-smoke-results.xml
+      - name: Upload live smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: live-smoke-evidence
+          path: |
+            reports/
+            live-smoke-results.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+  live-readonly-regression:
+    name: Live read-only regression tests
+    if: github.event_name == 'workflow_dispatch' && inputs.run_live_regression
+    needs: offline-contract-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+      - name: Run non-mutating API and browser regression tests
+        run: python -m pytest -m '(api or ui) and regression and not stateful and not auth' -v --junitxml=live-regression-results.xml
+      - name: Upload live regression evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: live-regression-evidence
+          path: |
+            reports/
+            live-regression-results.xml
+          if-no-files-found: warn
+          retention-days: 14

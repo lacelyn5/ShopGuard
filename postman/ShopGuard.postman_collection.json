@@ -1,0 +1,566 @@
+{
+  "info": {
+    "name": "ShopGuard - Toolshop API Regression",
+    "_postman_id": "a5c9e6b2-6c39-4c24-a0b9-5e429bba4470",
+    "description": "Run Catalog first, Authentication second. This suite does not create products or orders. Uses the public official Toolshop demo account only.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Catalog",
+      "description": "GET catalog checks.",
+      "item": [
+        {
+          "name": "01 - List products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/products",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "const data = pm.response.json();",
+                  "pm.test(\"Pagination schema\", () => { pm.expect(data.data).to.be.an(\"array\").that.is.not.empty; pm.expect(data.total).to.be.a(\"number\"); });",
+                  "if (data.data.length > 0) { pm.collectionVariables.set(\"productId\", data.data[0].id); pm.collectionVariables.set(\"productName\", data.data[0].name); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Page 1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/products?page=1",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "pm.test(\"Page is 1\", () => pm.expect(pm.response.json().current_page).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 - Sort price ascending",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/products?sort=price,asc",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "price,asc"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "const prices=pm.response.json().data.map(p=>p.price); pm.test(\"Ascending prices\",()=>{for(let i=1;i<prices.length;i++) pm.expect(prices[i]).to.be.at.least(prices[i-1]);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 - Sort price descending",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/products?sort=price,desc",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "price,desc"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "const prices=pm.response.json().data.map(p=>p.price); pm.test(\"Descending prices\",()=>{for(let i=1;i<prices.length;i++) pm.expect(prices[i]).to.be.at.most(prices[i-1]);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 - Get known product",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/products/{{productId}}",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "pm.test(\"Correct item fetched\",()=>pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get(\"productId\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 - Search known name",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/products/search?q={{productName}}",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{productName}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "pm.test(\"Search includes known product\",()=>{const ids=pm.response.json().data.map(p=>p.id);pm.expect(ids).to.include(pm.collectionVariables.get(\"productId\"));});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 - Related products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/products/{{productId}}/related",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}",
+                "related"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "pm.test(\"Related is array\",()=>pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 - Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/categories",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "pm.test(\"Named categories\",()=>pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 - Category tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/categories/tree",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "categories",
+                "tree"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "pm.test(\"Tree is array\",()=>pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 - Brands",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/brands",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "brands"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "pm.test(\"Named brands\",()=>pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "description": "Read-only endpoint checks; the only POST is demo login.",
+      "item": [
+        {
+          "name": "11 - Anonymous profile denied",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/users/me",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"401 without token\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 - Anonymous admin report denied",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/reports/top10-purchased-products",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "reports",
+                "top10-purchased-products"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"401 without admin\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 - Demo customer sign-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/users/login",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "users",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{demoEmail}}\",\n  \"password\": \"{{demoPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "const data=pm.response.json(); pm.test(\"Bearer token returned\",()=>pm.expect(data.access_token).to.be.a(\"string\").that.is.not.empty); pm.collectionVariables.set(\"accessToken\",data.access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 - Read signed-in profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{apiUrl}}/users/me",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"json\"); });",
+                  "pm.test(\"Public demo customer matches\",()=>pm.expect(pm.response.json().email.toLowerCase()).to.eql(pm.environment.get(\"demoEmail\").toLowerCase()));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "productName",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ]
+}
