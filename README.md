@@ -24,7 +24,7 @@ The built-in test suites target the public [Practice Software Testing / Toolshop
 | **Postman** | Includes a collection of 14 ordered HTTP requests with assertions. |
 | **CI** | Runs offline checks with Python 3.11, 3.12, 3.13, and 3.14 through GitHub Actions. |
 
-## Quick start — Windows
+## Quick start and daily workflow
 
 **Requirements:** Python 3.11 or newer. An internet connection is needed to install dependencies, download Chromium, and run live tests.
 
